@@ -1,5 +1,6 @@
 # ExpandableLayout
 Expandable LinearLayout
+<img src="https://raw.githubusercontent.com/iammert/ExpandableLayout/master/art/ell.png"/>
 
 # Setup
 
