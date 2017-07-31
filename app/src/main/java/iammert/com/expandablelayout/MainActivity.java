@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
+import iammert.com.expandablelib.ExpandCollapseListener;
 import iammert.com.expandablelib.ExpandableLayout;
 import iammert.com.expandablelib.Section;
 
@@ -36,12 +37,18 @@ public class MainActivity extends AppCompatActivity {
         sectionLinearLayout.addSection(getSection());
         sectionLinearLayout.addSection(getSection());
 
-        sectionLinearLayout.setExpandListener((parentIndex, parent, view) -> {
-            view.findViewById(R.id.arrow).setBackgroundResource(R.drawable.arrow_up);
+        sectionLinearLayout.setExpandListener(new ExpandCollapseListener.ExpandListener<FruitCategory>() {
+            @Override
+            public void onExpanded(int parentIndex, FruitCategory parent, View view) {
+
+            }
         });
 
-        sectionLinearLayout.setCollapseListener((parentIndex, parent, view) -> {
-            view.findViewById(R.id.arrow).setBackgroundResource(R.drawable.arrow_down);
+        sectionLinearLayout.setCollapseListener(new ExpandCollapseListener.CollapseListener<FruitCategory>() {
+            @Override
+            public void onCollapsed(int parentIndex, FruitCategory parent, View view) {
+
+            }
         });
 
     }
