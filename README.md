@@ -4,6 +4,15 @@ Expandable LinearLayout
 
 # Setup
 
+## Layout
+```xml
+<iammert.com.expandablelib.ExpandableLayout
+    android:id="@+id/el"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:parentLayout="@layout/layout_parent"
+    app:childLayout="@layout/layout_child"/>
+```
 ## Set renderers
 ```java
 expandableLayout.setParentRenderer(new ExpandableLayout.Renderer<FruitCategory>() {
