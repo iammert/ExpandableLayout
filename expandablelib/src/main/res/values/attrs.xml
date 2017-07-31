@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="ExpandableLayout">
+        <attr name="parentLayout" format="integer" />
+        <attr name="childLayout" format="integer" />
+    </declare-styleable>
+
+</resources>
