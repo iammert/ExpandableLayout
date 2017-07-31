@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-        ExpandableLayout sectionLinearLayout = findViewById(R.id.el);
+        ExpandableLayout sectionLinearLayout = (ExpandableLayout) findViewById(R.id.el);
 
         sectionLinearLayout.setParentRenderer(new ExpandableLayout.Renderer<FruitCategory>() {
             @Override
