@@ -13,7 +13,7 @@ allprojects {
 }
 
 dependencies {
-    compile 'com.github.iammert:ExpandableLayout:1.1'
+    compile 'com.github.iammert:ExpandableLayout:1.3'
 }
 ```
 ## Layout
@@ -27,18 +27,17 @@ dependencies {
 ```
 ## Set renderers
 ```java
-expandableLayout.setParentRenderer(new ExpandableLayout.Renderer<FruitCategory>() {
-    @Override
-    public void render(View view, FruitCategory model, boolean isExpanded) {
-        ((TextView) view.findViewById(R.id.name)).setText(model.name);
-    }
-});
+expandableLayout.setRenderer(new ExpandableLayout.Renderer<FruitCategory, Fruit>() {
+@Override
+public void renderParent(View view, FruitCategory model, boolean isExpanded, int parentPosition) {
+    ((TextView) view.findViewById(R.id.tvParent)).setText(model.name);
+    view.findViewById(R.id.arrow).setBackgroundResource(isExpanded ? R.drawable.arrow_up : R.drawable.arrow_down);
+}
 
-expandableLayout.setChildRenderer(new ExpandableLayout.Renderer<Fruit>() {
-    @Override
-    public void render(View view, Fruit model, boolean isExpanded) {
-        ((TextView) view.findViewById(R.id.name)).setText(model.name);
-    }
+@Override
+public void renderChild(View view, Fruit model, int parentPosition, int childPosition) {
+    ((TextView) view.findViewById(R.id.tvChild)).setText(model.name);
+}
 });
 ```
 ## Set listeners
