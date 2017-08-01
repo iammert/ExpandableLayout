@@ -25,7 +25,7 @@ dependencies {
     app:parentLayout="@layout/layout_parent"
     app:childLayout="@layout/layout_child"/>
 ```
-## Set renderers
+## Set renderer
 ```java
 expandableLayout.setRenderer(new ExpandableLayout.Renderer<FruitCategory, Fruit>() {
     @Override
