@@ -28,15 +28,15 @@ dependencies {
 ## Set renderers
 ```java
 expandableLayout.setRenderer(new ExpandableLayout.Renderer<FruitCategory, Fruit>() {
-@Override
-public void renderParent(View view, FruitCategory model, boolean isExpanded, int parentPosition) {
-    ((TextView) view.findViewById(R.id.tvParent)).setText(model.name);
-}
+    @Override
+    public void renderParent(View view, FruitCategory model, boolean isExpanded, int parentPosition) {
+        ((TextView) view.findViewById(R.id.tvParent)).setText(model.name);
+    }
 
-@Override
-public void renderChild(View view, Fruit model, int parentPosition, int childPosition) {
-    ((TextView) view.findViewById(R.id.tvChild)).setText(model.name);
-}
+    @Override
+    public void renderChild(View view, Fruit model, int parentPosition, int childPosition) {
+        ((TextView) view.findViewById(R.id.tvChild)).setText(model.name);
+    }
 });
 ```
 ## Set listeners
