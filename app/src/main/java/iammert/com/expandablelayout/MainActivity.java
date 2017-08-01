@@ -19,17 +19,15 @@ public class MainActivity extends AppCompatActivity {
 
         ExpandableLayout sectionLinearLayout = (ExpandableLayout) findViewById(R.id.el);
 
-        sectionLinearLayout.setParentRenderer(new ExpandableLayout.Renderer<FruitCategory>() {
+        sectionLinearLayout.setRenderer(new ExpandableLayout.Renderer<FruitCategory, Fruit>() {
             @Override
-            public void render(View view, FruitCategory model, boolean isExpanded) {
+            public void renderParent(View view, FruitCategory model, boolean isExpanded, int parentPosition) {
                 ((TextView) view.findViewById(R.id.tvParent)).setText(model.name);
                 view.findViewById(R.id.arrow).setBackgroundResource(isExpanded ? R.drawable.arrow_up : R.drawable.arrow_down);
             }
-        });
 
-        sectionLinearLayout.setChildRenderer(new ExpandableLayout.Renderer<Fruit>() {
             @Override
-            public void render(View view, Fruit model, boolean isExpanded) {
+            public void renderChild(View view, Fruit model, int parentPosition, int childPosition) {
                 ((TextView) view.findViewById(R.id.tvChild)).setText(model.name);
             }
         });

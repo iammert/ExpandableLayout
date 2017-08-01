@@ -22,8 +22,10 @@ import java.util.List;
 
 public class ExpandableLayout extends LinearLayout {
 
-    public interface Renderer<T> {
-        void render(View view, T model, boolean isExpanded, int position);
+    public interface Renderer<P, C> {
+        void renderParent(View view, P model, boolean isExpanded, int parentPosition);
+
+        void renderChild(View view, C model, int parentPosition, int childPosition);
     }
 
     private static final int NO_RES = 0;
@@ -38,9 +40,7 @@ public class ExpandableLayout extends LinearLayout {
     @LayoutRes
     private int childLayout;
 
-    private Renderer parentRenderer;
-
-    private Renderer childRenderer;
+    private Renderer renderer;
 
     private List<Section> sections;
 
@@ -89,12 +89,8 @@ public class ExpandableLayout extends LinearLayout {
         this.collapseListener = collapseListener;
     }
 
-    public void setParentRenderer(@NonNull Renderer renderer) {
-        this.parentRenderer = renderer;
-    }
-
-    public void setChildRenderer(@NonNull Renderer renderer) {
-        this.childRenderer = renderer;
+    public void setRenderer(@NonNull Renderer renderer) {
+        this.renderer = renderer;
     }
 
     public void addSection(@NonNull Section section) {
@@ -129,31 +125,29 @@ public class ExpandableLayout extends LinearLayout {
     }
 
     private <C> void notifyItemAdded(int parentIndex, C child) {
-        if (childRenderer == null) {
+        if (renderer == null) {
             return;
         }
         ViewGroup parentView = (ViewGroup) getChildAt(parentIndex);
         View childView = layoutInflater.inflate(childLayout, null);
-        childRenderer.render(childView, child, sections.get(parentIndex).expanded, sections.get(parentIndex).children.size() - 1);
+        renderer.renderChild(childView, child, parentIndex, sections.get(parentIndex).children.size() - 1);
         parentView.addView(childView);
     }
 
     private <C> void notifyItemAdded(int parentIndex, List<C> children) {
-        if (childRenderer == null) {
+        if (renderer == null) {
             return;
         }
         ViewGroup parentView = (ViewGroup) getChildAt(parentIndex);
-        boolean isExpanded = sections.get(parentIndex).expanded;
         for (int i = 0; i < children.size(); i++) {
             View childView = layoutInflater.inflate(childLayout, null);
-            childRenderer.render(childView, children.get(i), isExpanded, i);
+            renderer.renderChild(childView, children.get(i), parentIndex, i);
             parentView.addView(childView);
         }
     }
 
     private void notifySectionAdded(final Section section) {
-
-        if (parentRenderer == null || childRenderer == null)
+        if (renderer == null)
             return;
 
         LinearLayout sectionLayout = new LinearLayout(getContext());
@@ -171,14 +165,14 @@ public class ExpandableLayout extends LinearLayout {
                 }
             }
         });
-        parentRenderer.render(parentView, section.parent, section.expanded, sections.size() - 1);
+        renderer.renderParent(parentView, section.parent, section.expanded, sections.size() - 1);
         sectionLayout.addView(parentView);
 
         if (section.expanded) {
             for (int i = 0; i < section.children.size(); i++) {
                 Object child = section.children.get(i);
                 View childView = layoutInflater.inflate(childLayout, null);
-                childRenderer.render(childView, child, section.expanded, i);
+                renderer.renderChild(childView, child, sections.size() - 1, i);
                 sectionLayout.addView(childView);
             }
         }
