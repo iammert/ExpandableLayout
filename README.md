@@ -31,7 +31,6 @@ expandableLayout.setRenderer(new ExpandableLayout.Renderer<FruitCategory, Fruit>
 @Override
 public void renderParent(View view, FruitCategory model, boolean isExpanded, int parentPosition) {
     ((TextView) view.findViewById(R.id.tvParent)).setText(model.name);
-    view.findViewById(R.id.arrow).setBackgroundResource(isExpanded ? R.drawable.arrow_up : R.drawable.arrow_down);
 }
 
 @Override
