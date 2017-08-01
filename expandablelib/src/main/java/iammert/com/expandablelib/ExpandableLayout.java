@@ -23,7 +23,7 @@ import java.util.List;
 public class ExpandableLayout extends LinearLayout {
 
     public interface Renderer<T> {
-        void render(View view, T model, boolean isExpanded);
+        void render(View view, T model, boolean isExpanded, int position);
     }
 
     private static final int NO_RES = 0;
@@ -134,7 +134,7 @@ public class ExpandableLayout extends LinearLayout {
         }
         ViewGroup parentView = (ViewGroup) getChildAt(parentIndex);
         View childView = layoutInflater.inflate(childLayout, null);
-        childRenderer.render(childView, child, sections.get(parentIndex).expanded);
+        childRenderer.render(childView, child, sections.get(parentIndex).expanded, sections.get(parentIndex).children.size() - 1);
         parentView.addView(childView);
     }
 
@@ -146,7 +146,7 @@ public class ExpandableLayout extends LinearLayout {
         boolean isExpanded = sections.get(parentIndex).expanded;
         for (int i = 0; i < children.size(); i++) {
             View childView = layoutInflater.inflate(childLayout, null);
-            childRenderer.render(childView, children.get(i), isExpanded);
+            childRenderer.render(childView, children.get(i), isExpanded, i);
             parentView.addView(childView);
         }
     }
@@ -171,13 +171,14 @@ public class ExpandableLayout extends LinearLayout {
                 }
             }
         });
-        parentRenderer.render(parentView, section.parent, section.expanded);
+        parentRenderer.render(parentView, section.parent, section.expanded, sections.size() - 1);
         sectionLayout.addView(parentView);
 
         if (section.expanded) {
-            for (Object child : section.children) {
+            for (int i = 0; i < section.children.size(); i++) {
+                Object child = section.children.get(i);
                 View childView = layoutInflater.inflate(childLayout, null);
-                childRenderer.render(childView, child, section.expanded);
+                childRenderer.render(childView, child, section.expanded, i);
                 sectionLayout.addView(childView);
             }
         }
