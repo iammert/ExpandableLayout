@@ -98,6 +98,10 @@ public class ExpandableLayout extends LinearLayout {
         notifySectionAdded(section);
     }
 
+    public List<Section> getSections() {
+        return sections;
+    }
+
     public <P, C> void addChild(P parent, C child) {
         int parentIndex = NO_INDEX;
         for (int i = 0; i < sections.size(); i++) {
