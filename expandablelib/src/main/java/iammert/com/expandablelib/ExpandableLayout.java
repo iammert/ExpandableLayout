@@ -106,7 +106,9 @@ public class ExpandableLayout extends LinearLayout {
         int parentIndex = NO_INDEX;
         for (int i = 0; i < sections.size(); i++) {
             if (sections.get(i).parent.equals(parent)) {
-                sections.get(i).children.add(child);
+                if (!sections.get(i).children.contains(child)) {
+                    sections.get(i).children.add(child);
+                }
                 parentIndex = i;
             }
         }
@@ -119,7 +121,9 @@ public class ExpandableLayout extends LinearLayout {
         int parentIndex = NO_INDEX;
         for (int i = 0; i < sections.size(); i++) {
             if (sections.get(i).parent.equals(parent)) {
-                sections.get(i).children.addAll(children);
+                if (!sections.get(i).children.containsAll(children)) {
+                    sections.get(i).children.addAll(children);
+                }
                 parentIndex = i;
             }
         }
