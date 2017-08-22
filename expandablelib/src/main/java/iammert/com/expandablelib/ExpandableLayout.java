@@ -193,6 +193,17 @@ public class ExpandableLayout extends LinearLayout {
         addView(sectionLayout);
     }
 
+    public void notifyParentChanged(int position) {
+        if (position > getChildCount() - 1) {
+            return;
+        }
+        ViewGroup viewGroup = (ViewGroup) getChildAt(position);
+        if (viewGroup != null && viewGroup.getChildCount() > 0) {
+            View parentView = viewGroup.getChildAt(0);
+            renderer.renderParent(parentView, sections.get(position).parent, sections.get(position).expanded, position);
+        }
+    }
+
     private <P> void expand(@NonNull P parent) {
         for (int i = 0; i < sections.size(); i++) {
             if (parent.equals(sections.get(i).parent)) {
