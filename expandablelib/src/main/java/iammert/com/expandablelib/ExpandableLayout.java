@@ -187,7 +187,7 @@ public class ExpandableLayout extends LinearLayout {
         addView(sectionLayout);
     }
 
-    private <P> void expand(@NonNull P parent) {
+    public <P> void expand(@NonNull P parent) {
         for (int i = 0; i < sections.size(); i++) {
             if (parent.equals(sections.get(i).parent)) {
                 ViewGroup sectionView = ((ViewGroup) getChildAt(i));
@@ -201,7 +201,7 @@ public class ExpandableLayout extends LinearLayout {
         }
     }
 
-    private <P> void collapse(@NonNull P parent) {
+    public <P> void collapse(@NonNull P parent) {
         for (int i = 0; i < sections.size(); i++) {
             if (parent.equals(sections.get(i).parent)) {
                 ViewGroup sectionView = ((ViewGroup) getChildAt(i));

@@ -48,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
     }
 
     public Section<FruitCategory, Fruit> getSection() {
