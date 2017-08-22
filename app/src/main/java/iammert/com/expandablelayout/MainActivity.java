@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         section.children.add(fruit3);
         section.children.add(fruit4);
         section.children.add(fruit5);
+        section.expanded = true;
         return section;
     }
 }

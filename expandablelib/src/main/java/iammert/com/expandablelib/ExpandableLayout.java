@@ -114,6 +114,9 @@ public class ExpandableLayout extends LinearLayout {
         }
         if (parentIndex != NO_INDEX) {
             notifyItemAdded(parentIndex, child);
+            if (sections.get(parentIndex).expanded) {
+                expand(parent);
+            }
         }
     }
 
@@ -129,6 +132,9 @@ public class ExpandableLayout extends LinearLayout {
         }
         if (parentIndex != NO_INDEX) {
             notifyItemAdded(parentIndex, children);
+            if (sections.get(parentIndex).expanded) {
+                expand(parent);
+            }
         }
     }
 
@@ -187,7 +193,7 @@ public class ExpandableLayout extends LinearLayout {
         addView(sectionLayout);
     }
 
-    public <P> void expand(@NonNull P parent) {
+    private <P> void expand(@NonNull P parent) {
         for (int i = 0; i < sections.size(); i++) {
             if (parent.equals(sections.get(i).parent)) {
                 ViewGroup sectionView = ((ViewGroup) getChildAt(i));
@@ -201,7 +207,7 @@ public class ExpandableLayout extends LinearLayout {
         }
     }
 
-    public <P> void collapse(@NonNull P parent) {
+    private <P> void collapse(@NonNull P parent) {
         for (int i = 0; i < sections.size(); i++) {
             if (parent.equals(sections.get(i).parent)) {
                 ViewGroup sectionView = ((ViewGroup) getChildAt(i));
