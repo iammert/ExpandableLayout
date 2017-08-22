@@ -58,6 +58,8 @@ expandableLayout.setCollapseListener(new ExpandCollapseListener.CollapseListener
 ## Add section or children
 ```java
 Section<FruitCategory, Fruit> section = new Section<>();
+//defaut is false
+section.expanded = true;
 
 FruitCategory fruitCategory = new FruitCategory("Fruits");
 Fruit fruit1 = new Fruit("Apple");
