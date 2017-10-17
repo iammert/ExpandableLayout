@@ -13,7 +13,7 @@ allprojects {
 }
 
 dependencies {
-    compile 'com.github.iammert:ExpandableLayout:1.3'
+    compile 'com.github.iammert:ExpandableLayout:1.4.1'
 }
 ```
 ## Layout
