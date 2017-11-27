@@ -2,7 +2,10 @@ package iammert.com.expandablelayout;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import iammert.com.expandablelib.ExpandCollapseListener;
@@ -11,12 +14,18 @@ import iammert.com.expandablelib.Section;
 
 public class MainActivity extends AppCompatActivity {
 
+    String[] parents = new String[]{"Fruits",
+            "Nice Fruits", "Cool Fruits",
+            "Perfect Fruits", "Frozen Fruits",
+            "Warm Fruits"};
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
 
+        EditText editText = (EditText) findViewById(R.id.edittext);
         ExpandableLayout sectionLinearLayout = (ExpandableLayout) findViewById(R.id.el);
 
         sectionLinearLayout.setRenderer(new ExpandableLayout.Renderer<FruitCategory, Fruit>() {
@@ -34,17 +43,38 @@ public class MainActivity extends AppCompatActivity {
 
         sectionLinearLayout.addSection(getSection());
         sectionLinearLayout.addSection(getSection());
+        sectionLinearLayout.addSection(getSection());
+        sectionLinearLayout.addSection(getSection());
+        sectionLinearLayout.addSection(getSection());
+        sectionLinearLayout.addSection(getSection());
+        sectionLinearLayout.addSection(getSection());
+        sectionLinearLayout.addSection(getSection());
+        sectionLinearLayout.addSection(getSection());
+        sectionLinearLayout.addSection(getSection());
+        sectionLinearLayout.addSection(getSection());
 
-        sectionLinearLayout.setExpandListener(new ExpandCollapseListener.ExpandListener<FruitCategory>() {
-            @Override
-            public void onExpanded(int parentIndex, FruitCategory parent, View view) {
+        sectionLinearLayout.setExpandListener((ExpandCollapseListener.ExpandListener<FruitCategory>) (parentIndex, parent, view) -> {
 
-            }
         });
 
-        sectionLinearLayout.setCollapseListener(new ExpandCollapseListener.CollapseListener<FruitCategory>() {
+        sectionLinearLayout.setCollapseListener((ExpandCollapseListener.CollapseListener<FruitCategory>) (parentIndex, parent, view) -> {
+
+        });
+
+
+        editText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onCollapsed(int parentIndex, FruitCategory parent, View view) {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                sectionLinearLayout.filterChildren(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
 
             }
         });
@@ -52,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
 
     public Section<FruitCategory, Fruit> getSection() {
         Section<FruitCategory, Fruit> section = new Section<>();
-        FruitCategory fruitCategory = new FruitCategory("Fruits");
+        FruitCategory fruitCategory = new FruitCategory(parents[(int) (Math.random() * parents.length)]);
         Fruit fruit1 = new Fruit("Apple");
         Fruit fruit2 = new Fruit("Orange");
         Fruit fruit3 = new Fruit("Banana");

@@ -1,16 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="iammert.com.expandablelayout.MainActivity">
 
-    <iammert.com.expandablelib.ExpandableLayout
-        android:id="@+id/el"
+    <EditText
+        android:id="@+id/edittext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:parentLayout="@layout/layout_parent"
-        app:childLayout="@layout/layout_child"/>
+        android:layout_below="@+id/edittext">
+
+        <iammert.com.expandablelib.ExpandableLayout
+            android:id="@+id/el"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:childLayout="@layout/layout_child"
+            app:parentLayout="@layout/layout_parent" />
+
+    </ScrollView>
 
 </RelativeLayout>
