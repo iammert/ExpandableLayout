@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                sectionLinearLayout.filterChildren(s.toString());
+                sectionLinearLayout.filterChildren(obj -> ((Fruit) obj).name.toLowerCase().contains(s.toString().toLowerCase()));
             }
 
             @Override
@@ -96,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
         section.children.add(fruit3);
         section.children.add(fruit4);
         section.children.add(fruit5);
+        section.children.add(fruit6);
         section.expanded = true;
         return section;
     }

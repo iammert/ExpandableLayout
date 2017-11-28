@@ -1,6 +1,5 @@
 package iammert.com.expandablelib;
 
-import android.animation.LayoutTransition;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -33,7 +32,12 @@ public class ExpandableLayout extends LinearLayout {
 
     private static final int NO_INDEX = -1;
 
-    private static final String DEFAULT_FILTER = "";
+    private static final Operation DEFAULT_FILTER = new Operation() {
+        @Override
+        public boolean apply(Object obj) {
+            return true;
+        }
+    };
 
     private LayoutInflater layoutInflater;
 
@@ -51,9 +55,7 @@ public class ExpandableLayout extends LinearLayout {
 
     private ExpandCollapseListener.CollapseListener collapseListener;
 
-    private FilterManager filterManager;
-
-    private String currentFilter = DEFAULT_FILTER;
+    private Operation currentFilter = DEFAULT_FILTER;
 
     public ExpandableLayout(Context context) {
         super(context);
@@ -79,7 +81,6 @@ public class ExpandableLayout extends LinearLayout {
     private void init(Context context, AttributeSet attributeSet) {
         setOrientation(VERTICAL);
         sections = new ArrayList<>();
-        filterManager = new FilterManager(true);
         TypedArray typedArray = null;
         try {
             typedArray = context.obtainStyledAttributes(attributeSet, R.styleable.ExpandableLayout);
@@ -91,10 +92,6 @@ public class ExpandableLayout extends LinearLayout {
                 typedArray.recycle();
             }
         }
-    }
-
-    public void filterLowerCase(boolean filterLowerCase) {
-        filterManager.setEnableLowerCaseFiltering(filterLowerCase);
     }
 
     public <P> void setExpandListener(ExpandCollapseListener.ExpandListener<P> expandListener) {
@@ -154,33 +151,29 @@ public class ExpandableLayout extends LinearLayout {
         }
     }
 
-    public void filterParent(@NonNull String key) {
+    public void filterParent(@NonNull Operation op) {
         for (Section section : getSections()) {
             final Object parent = section.parent;
-            if (parent instanceof Filterable) {
-                final Filterable filterable = (Filterable) parent;
-                final boolean contains = filterManager.contains(filterable.getKey(), key);
-                getChildAt(sections.indexOf(section)).setVisibility(contains ? View.VISIBLE : View.GONE);
-            }
+            final boolean contains = op.apply(parent);
+            getChildAt(sections.indexOf(section)).setVisibility(contains ? View.VISIBLE : View.GONE);
         }
     }
 
-    public void filterChildren(@NonNull String key) {
-        currentFilter = key;
+
+    public void filterChildren(@NonNull Operation op) {
+        currentFilter = op;
         for (Section section : getSections()) {
             final List children = section.children;
             boolean keepParentVisible = false;
             final ViewGroup childrenViews = (ViewGroup) getChildAt(sections.indexOf(section));
             for (int i = 0; i < children.size(); i++) {
                 final Object child = children.get(i);
-                if (child instanceof Filterable) {
-                    final Filterable filterable = (Filterable) child;
-                    final boolean contains = filterManager.contains(filterable.getKey(), key);
-                    childrenViews.getChildAt(children.indexOf(child) + 1).setVisibility(contains ? View.VISIBLE : View.GONE);
-                    if (!keepParentVisible && contains) {
-                        keepParentVisible = true;
-                    }
+                final boolean contains = op.apply(child);
+                childrenViews.getChildAt(children.indexOf(child) + 1).setVisibility(contains ? View.VISIBLE : View.GONE);
+                if (!keepParentVisible && contains) {
+                    keepParentVisible = true;
                 }
+
             }
             childrenViews.setVisibility(keepParentVisible ? View.VISIBLE : View.GONE);
         }
@@ -256,18 +249,11 @@ public class ExpandableLayout extends LinearLayout {
         for (int i = 0; i < sections.size(); i++) {
             if (parent.equals(sections.get(i).parent)) {
                 ViewGroup sectionView = ((ViewGroup) getChildAt(i));
-
                 for (int j = 1; j < sectionView.getChildCount(); j++) {
                     final View childView = sectionView.getChildAt(j);
                     final Object childType = sections.get(i).children.get(j - 1);
-                    if (childType instanceof Filterable) {
-                        Filterable filterable = (Filterable) childType;
-                        childView.setVisibility(filterManager.contains(filterable.getKey(), currentFilter) ? View.VISIBLE : View.GONE);
-                    } else {
-                        childView.setVisibility(View.VISIBLE);
-                    }
+                    childView.setVisibility(currentFilter.apply(childType) ? View.VISIBLE : View.GONE);
                 }
-
                 sections.get(i).expanded = true;
                 if (expandListener != null)
                     expandListener.onExpanded(i, sections.get(i).parent, sectionView.getChildAt(0));
