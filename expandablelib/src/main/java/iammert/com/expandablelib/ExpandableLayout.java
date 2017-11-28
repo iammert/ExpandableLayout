@@ -80,13 +80,17 @@ public class ExpandableLayout extends LinearLayout {
         setOrientation(VERTICAL);
         sections = new ArrayList<>();
         filterManager = new FilterManager(true);
-        TypedArray typedArray = context.obtainStyledAttributes(attributeSet, R.styleable.ExpandableLayout);
-
-        parentLayout = typedArray.getResourceId(R.styleable.ExpandableLayout_parentLayout, NO_RES);
-        childLayout = typedArray.getResourceId(R.styleable.ExpandableLayout_childLayout, NO_RES);
-        layoutInflater = LayoutInflater.from(context);
-
-        typedArray.recycle();
+        TypedArray typedArray = null;
+        try {
+            typedArray = context.obtainStyledAttributes(attributeSet, R.styleable.ExpandableLayout);
+            parentLayout = typedArray.getResourceId(R.styleable.ExpandableLayout_parentLayout, NO_RES);
+            childLayout = typedArray.getResourceId(R.styleable.ExpandableLayout_childLayout, NO_RES);
+            layoutInflater = LayoutInflater.from(context);
+        } finally {
+            if (typedArray != null) {
+                typedArray.recycle();
+            }
+        }
     }
 
     public void filterLowerCase(boolean filterLowerCase) {
