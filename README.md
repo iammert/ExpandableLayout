@@ -73,6 +73,23 @@ section.children.add(fruit2);
 expandableLayout.addSection(section);
 expandableLayout.addChild(fruitCategory, new Fruit("Grape"));
 ```
+
+## Filter parent and children
+
+```java
+//make your parent class filterable
+class FruitCatefory implements Filterable{}
+
+//make your child class filterable
+class FruitCatefory implements Filterable{}
+```
+Now, you can search in parents or children. Layout will be updated automatically. 
+```java
+expendableLayout.filterParent("SEARCH PARAM")
+//or
+expendableLayout.filterChildren("SEARCH PARAM")
+```
+
 License
 --------
 
