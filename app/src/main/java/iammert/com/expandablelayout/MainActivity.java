@@ -11,6 +11,7 @@ import android.widget.TextView;
 import iammert.com.expandablelib.ExpandCollapseListener;
 import iammert.com.expandablelib.ExpandableLayout;
 import iammert.com.expandablelib.Section;
+import iammert.com.expandablelib.animations.ExpendableScaleAnimation;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
         EditText editText = (EditText) findViewById(R.id.edittext);
         ExpandableLayout sectionLinearLayout = (ExpandableLayout) findViewById(R.id.el);
-
+        sectionLinearLayout.setExpandableAnimation(new ExpendableScaleAnimation(2000));
         sectionLinearLayout.setRenderer(new ExpandableLayout.Renderer<FruitCategory, Fruit>() {
             @Override
             public void renderParent(View view, FruitCategory model, boolean isExpanded, int parentPosition) {

@@ -55,6 +55,23 @@ expandableLayout.setCollapseListener(new ExpandCollapseListener.CollapseListener
     }
 });
 ```
+
+## Set animations
+<img src="https://raw.githubusercontent.com/iammert/ExpandableLayout/master/art/animation1.gif"/>
+
+```java
+sectionLinearLayout.setExpandableAnimation(new ExpendableScaleAnimation(2000));    
+```
+
+or create custom animation
+```java
+        sectionLinearLayout.setExpandableAnimation(new ExpandableAnimation(2000) {
+            @Override
+            public Animation generateAnimation(View parentView, View childView, ExpandableState expandableState) {
+                return null;
+            }
+        });
+```
 ## Add section or children
 ```java
 Section<FruitCategory, Fruit> section = new Section<>();
