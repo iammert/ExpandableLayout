@@ -57,6 +57,16 @@ public class ExpandableLayout extends LinearLayout {
 
     private Operation currentFilter = DEFAULT_FILTER;
 
+    public ExpandableAnimation getExpandableAnimation() {
+        return mExpandableAnimation;
+    }
+
+    public void setExpandableAnimation(ExpandableAnimation expandableAnimation) {
+        mExpandableAnimation = expandableAnimation;
+    }
+
+    private ExpandableAnimation mExpandableAnimation;
+
     public ExpandableLayout(Context context) {
         super(context);
         init(context, null);
@@ -252,9 +262,14 @@ public class ExpandableLayout extends LinearLayout {
                 for (int j = 1; j < sectionView.getChildCount(); j++) {
                     final View childView = sectionView.getChildAt(j);
                     final Object childType = sections.get(i).children.get(j - 1);
-                    childView.setVisibility(currentFilter.apply(childType) ? View.VISIBLE : View.GONE);
+                    sectionViewAnimateVisibility(sectionView,childView,currentFilter.apply(childType) ?
+                            ExpandableState.EXPAND
+                            : ExpandableState.COLLAPSE);
                 }
                 sections.get(i).expanded = true;
+
+                // re-render parent for "arrow" animation
+                notifyParentChanged(i);
                 if (expandListener != null)
                     expandListener.onExpanded(i, sections.get(i).parent, sectionView.getChildAt(0));
                 break;
@@ -269,13 +284,23 @@ public class ExpandableLayout extends LinearLayout {
                 sections.get(i).expanded = false;
 
                 for (int j = 1; j < sectionView.getChildCount(); j++) {
-                    sectionView.getChildAt(j).setVisibility(View.GONE);
+                    sectionViewAnimateVisibility(sectionView,sectionView.getChildAt(j),ExpandableState.COLLAPSE);
                 }
-
+                // re-render parent for "arrow" animation
+                notifyParentChanged(i);
                 if (collapseListener != null)
                     collapseListener.onCollapsed(i, sections.get(i).parent, sectionView.getChildAt(0));
                 break;
             }
         }
+    }
+
+    private void sectionViewAnimateVisibility(final View parentView,final View childView,final ExpandableState expandableState){
+        if (mExpandableAnimation !=null){
+            childView.startAnimation(mExpandableAnimation.generateAnimation(parentView,childView,expandableState));
+        }else {
+            childView.setVisibility(expandableState == ExpandableState.EXPAND ? VISIBLE : GONE);
+        }
+
     }
 }
