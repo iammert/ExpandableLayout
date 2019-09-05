@@ -4,6 +4,7 @@
     <declare-styleable name="ExpandableLayout">
         <attr name="parentLayout" format="integer" />
         <attr name="childLayout" format="integer" />
+        <attr name="singleMode" format="boolean" />
     </declare-styleable>
 
 </resources>
