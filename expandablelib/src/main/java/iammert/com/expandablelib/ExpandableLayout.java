@@ -51,6 +51,8 @@ public class ExpandableLayout extends LinearLayout {
 
     private List<Section> sections;
 
+    private Boolean singleMode;
+
     private ExpandCollapseListener.ExpandListener expandListener;
 
     private ExpandCollapseListener.CollapseListener collapseListener;
@@ -86,6 +88,7 @@ public class ExpandableLayout extends LinearLayout {
             typedArray = context.obtainStyledAttributes(attributeSet, R.styleable.ExpandableLayout);
             parentLayout = typedArray.getResourceId(R.styleable.ExpandableLayout_parentLayout, NO_RES);
             childLayout = typedArray.getResourceId(R.styleable.ExpandableLayout_childLayout, NO_RES);
+            singleMode = typedArray.getBoolean(R.styleable.ExpandableLayout_singleMode, false);
             layoutInflater = LayoutInflater.from(context);
         } finally {
             if (typedArray != null) {
@@ -257,8 +260,8 @@ public class ExpandableLayout extends LinearLayout {
                 sections.get(i).expanded = true;
                 if (expandListener != null)
                     expandListener.onExpanded(i, sections.get(i).parent, sectionView.getChildAt(0));
-                break;
-            }
+            }else if (singleMode)
+                collapse(sections.get(i).parent);
         }
     }
 
