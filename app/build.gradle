@@ -1,19 +1,23 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+}
 
 android {
-    compileSdkVersion 28
+    namespace 'iammert.com.expandablelayout'
+    compileSdk 34
+
     defaultConfig {
-        applicationId "iammert.com.expandablelayout"
-        minSdkVersion 14
-        targetSdkVersion 28
+        applicationId 'iammert.com.expandablelayout'
+        minSdk 21
+        targetSdk 34
         versionCode 1
-        versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        versionName '1.0'
     }
+
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
@@ -24,11 +28,6 @@ android {
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0-alpha4', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    implementation 'androidx.appcompat:appcompat:1.0.0-rc01'
-    testImplementation 'junit:junit:4.12'
     implementation project(':expandablelib')
+    implementation 'androidx.appcompat:appcompat:1.6.1'
 }
