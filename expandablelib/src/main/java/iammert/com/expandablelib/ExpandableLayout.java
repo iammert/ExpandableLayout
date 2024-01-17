@@ -184,7 +184,7 @@ public class ExpandableLayout extends LinearLayout {
             return;
         }
         ViewGroup parentView = (ViewGroup) getChildAt(parentIndex);
-        View childView = layoutInflater.inflate(childLayout, null);
+        View childView = layoutInflater.inflate(childLayout, parentView, false);
         renderer.renderChild(childView, child, parentIndex, sections.get(parentIndex).children.size() - 1);
         parentView.addView(childView);
     }
@@ -195,7 +195,7 @@ public class ExpandableLayout extends LinearLayout {
         }
         ViewGroup parentView = (ViewGroup) getChildAt(parentIndex);
         for (int i = 0; i < children.size(); i++) {
-            View childView = layoutInflater.inflate(childLayout, null);
+            View childView = layoutInflater.inflate(childLayout, parentView, false);
             renderer.renderChild(childView, children.get(i), parentIndex, i);
             parentView.addView(childView);
         }
@@ -209,7 +209,7 @@ public class ExpandableLayout extends LinearLayout {
         sectionLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         sectionLayout.setOrientation(LinearLayout.VERTICAL);
 
-        View parentView = layoutInflater.inflate(parentLayout, null);
+        View parentView = layoutInflater.inflate(parentLayout, sectionLayout, false);
         parentView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -226,7 +226,7 @@ public class ExpandableLayout extends LinearLayout {
         if (section.expanded) {
             for (int i = 0; i < section.children.size(); i++) {
                 Object child = section.children.get(i);
-                View childView = layoutInflater.inflate(childLayout, null);
+                View childView = layoutInflater.inflate(childLayout, sectionLayout, false);
                 renderer.renderChild(childView, child, sections.size() - 1, i);
                 sectionLayout.addView(childView);
             }
