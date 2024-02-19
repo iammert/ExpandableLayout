@@ -127,4 +127,15 @@ public class ExpandableLayoutTest {
         assertEquals(View.GONE, sectionView(0).getVisibility());
         assertEquals(View.VISIBLE, sectionView(1).getVisibility());
     }
+
+    @Test
+    public void collapsedSection_showsChildrenWhenExpanded() {
+        layout.addSection(section("Fruits", false, "Apple", "Orange"));
+        assertEquals(Arrays.asList(), visibleChildren(0));
+
+        parentView(0).performClick();
+
+        assertEquals(Arrays.asList("Apple@0:0", "Orange@0:1"), visibleChildren(0));
+        assertEquals(Arrays.asList("expand Fruits"), events);
+    }
 }

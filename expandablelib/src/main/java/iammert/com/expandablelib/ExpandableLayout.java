@@ -223,13 +223,14 @@ public class ExpandableLayout extends LinearLayout {
         renderer.renderParent(parentView, section.parent, section.expanded, sections.size() - 1);
         sectionLayout.addView(parentView);
 
-        if (section.expanded) {
-            for (int i = 0; i < section.children.size(); i++) {
-                Object child = section.children.get(i);
-                View childView = layoutInflater.inflate(childLayout, sectionLayout, false);
-                renderer.renderChild(childView, child, sections.size() - 1, i);
-                sectionLayout.addView(childView);
-            }
+        // Children of collapsed sections are inflated too (but hidden),
+        // otherwise expanding the section later has nothing to show.
+        for (int i = 0; i < section.children.size(); i++) {
+            Object child = section.children.get(i);
+            View childView = layoutInflater.inflate(childLayout, sectionLayout, false);
+            renderer.renderChild(childView, child, sections.size() - 1, i);
+            childView.setVisibility(section.expanded ? View.VISIBLE : View.GONE);
+            sectionLayout.addView(childView);
         }
         addView(sectionLayout);
     }
