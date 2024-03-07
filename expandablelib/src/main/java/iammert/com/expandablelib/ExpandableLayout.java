@@ -116,39 +116,52 @@ public class ExpandableLayout extends LinearLayout {
     }
 
     public <P, C> void addChild(P parent, C child) {
-        int parentIndex = NO_INDEX;
-        for (int i = 0; i < sections.size(); i++) {
-            if (sections.get(i).parent.equals(parent)) {
-                if (!sections.get(i).children.contains(child)) {
-                    sections.get(i).children.add(child);
-                }
-                parentIndex = i;
-            }
+        int parentIndex = indexOfParent(parent);
+        if (parentIndex == NO_INDEX) {
+            return;
         }
-        if (parentIndex != NO_INDEX) {
-            notifyItemAdded(parentIndex, child);
-            if (sections.get(parentIndex).expanded) {
-                expand(parent);
-            }
+        Section section = sections.get(parentIndex);
+        if (section.children.contains(child)) {
+            return;
+        }
+        section.children.add(child);
+        notifyItemAdded(parentIndex, child);
+        if (section.expanded) {
+            expand(parent);
         }
     }
 
     public <P, C> void addChildren(P parent, List<C> children) {
-        int parentIndex = NO_INDEX;
+        int parentIndex = indexOfParent(parent);
+        if (parentIndex == NO_INDEX) {
+            return;
+        }
+        Section section = sections.get(parentIndex);
+        // Only add children that are not in the section yet, so the
+        // views stay in sync with the section's children list.
+        List<C> newChildren = new ArrayList<>();
+        for (C child : children) {
+            if (!section.children.contains(child) && !newChildren.contains(child)) {
+                newChildren.add(child);
+            }
+        }
+        if (newChildren.isEmpty()) {
+            return;
+        }
+        section.children.addAll(newChildren);
+        notifyItemAdded(parentIndex, newChildren);
+        if (section.expanded) {
+            expand(parent);
+        }
+    }
+
+    private int indexOfParent(Object parent) {
         for (int i = 0; i < sections.size(); i++) {
             if (sections.get(i).parent.equals(parent)) {
-                if (!sections.get(i).children.containsAll(children)) {
-                    sections.get(i).children.addAll(children);
-                }
-                parentIndex = i;
+                return i;
             }
         }
-        if (parentIndex != NO_INDEX) {
-            notifyItemAdded(parentIndex, children);
-            if (sections.get(parentIndex).expanded) {
-                expand(parent);
-            }
-        }
+        return NO_INDEX;
     }
 
     public void filterParent(@NonNull Operation op) {

@@ -138,4 +138,29 @@ public class ExpandableLayoutTest {
         assertEquals(Arrays.asList("Apple@0:0", "Orange@0:1"), visibleChildren(0));
         assertEquals(Arrays.asList("expand Fruits"), events);
     }
+
+    @Test
+    public void addChild_ignoresDuplicates() {
+        layout.addSection(section("Fruits", true, "Apple"));
+
+        layout.addChild("Fruits", "Apple");
+
+        assertEquals(1, layout.getSections().get(0).children.size());
+        assertEquals(2, sectionView(0).getChildCount());
+    }
+
+    @Test
+    public void addChildren_onlyAddsMissingChildren() {
+        layout.addSection(section("Fruits", true, "Apple"));
+
+        layout.addChildren("Fruits", Arrays.asList("Apple", "Orange", "Orange"));
+
+        assertEquals(Arrays.asList("Apple", "Orange"), layout.getSections().get(0).children);
+        assertEquals(3, sectionView(0).getChildCount());
+
+        // Views and data are still in sync, so toggling works.
+        parentView(0).performClick();
+        parentView(0).performClick();
+        assertEquals(2, visibleChildren(0).size());
+    }
 }
