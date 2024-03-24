@@ -207,9 +207,11 @@ public class ExpandableLayout extends LinearLayout {
             return;
         }
         ViewGroup parentView = (ViewGroup) getChildAt(parentIndex);
+        // The children were already appended to the section.
+        int firstPosition = sections.get(parentIndex).children.size() - children.size();
         for (int i = 0; i < children.size(); i++) {
             View childView = layoutInflater.inflate(childLayout, parentView, false);
-            renderer.renderChild(childView, children.get(i), parentIndex, i);
+            renderer.renderChild(childView, children.get(i), parentIndex, firstPosition + i);
             parentView.addView(childView);
         }
     }

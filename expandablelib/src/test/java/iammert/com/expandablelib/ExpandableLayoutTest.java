@@ -163,4 +163,13 @@ public class ExpandableLayoutTest {
         parentView(0).performClick();
         assertEquals(2, visibleChildren(0).size());
     }
+
+    @Test
+    public void addChildren_passesPositionsAfterExistingChildren() {
+        layout.addSection(section("Fruits", true, "Apple"));
+
+        layout.addChildren("Fruits", Arrays.asList("Orange", "Banana"));
+
+        assertEquals(Arrays.asList("Apple@0:0", "Orange@0:1", "Banana@0:2"), visibleChildren(0));
+    }
 }
