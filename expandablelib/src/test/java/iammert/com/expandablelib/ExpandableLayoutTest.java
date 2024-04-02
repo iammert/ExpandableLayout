@@ -172,4 +172,27 @@ public class ExpandableLayoutTest {
 
         assertEquals(Arrays.asList("Apple@0:0", "Orange@0:1", "Banana@0:2"), visibleChildren(0));
     }
+
+    @Test
+    public void addChild_toCollapsedSection_staysHidden() {
+        layout.addSection(section("Fruits", false, "Apple"));
+
+        layout.addChild("Fruits", "Orange");
+        layout.addChildren("Fruits", Arrays.asList("Banana"));
+
+        assertEquals(Arrays.asList(), visibleChildren(0));
+        parentView(0).performClick();
+        assertEquals(Arrays.asList("Apple@0:0", "Orange@0:1", "Banana@0:2"), visibleChildren(0));
+    }
+
+    @Test
+    public void addChild_doesNotNotifyExpandListener() {
+        layout.addSection(section("Fruits", true, "Apple"));
+
+        layout.addChild("Fruits", "Orange");
+        layout.addChildren("Fruits", Arrays.asList("Banana"));
+
+        assertEquals(Arrays.asList(), events);
+        assertEquals(3, visibleChildren(0).size());
+    }
 }

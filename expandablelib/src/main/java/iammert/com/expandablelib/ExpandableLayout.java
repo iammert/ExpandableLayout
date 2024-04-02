@@ -126,9 +126,6 @@ public class ExpandableLayout extends LinearLayout {
         }
         section.children.add(child);
         notifyItemAdded(parentIndex, child);
-        if (section.expanded) {
-            expand(parent);
-        }
     }
 
     public <P, C> void addChildren(P parent, List<C> children) {
@@ -150,9 +147,6 @@ public class ExpandableLayout extends LinearLayout {
         }
         section.children.addAll(newChildren);
         notifyItemAdded(parentIndex, newChildren);
-        if (section.expanded) {
-            expand(parent);
-        }
     }
 
     private int indexOfParent(Object parent) {
@@ -199,6 +193,7 @@ public class ExpandableLayout extends LinearLayout {
         ViewGroup parentView = (ViewGroup) getChildAt(parentIndex);
         View childView = layoutInflater.inflate(childLayout, parentView, false);
         renderer.renderChild(childView, child, parentIndex, sections.get(parentIndex).children.size() - 1);
+        childView.setVisibility(sections.get(parentIndex).expanded ? View.VISIBLE : View.GONE);
         parentView.addView(childView);
     }
 
@@ -212,6 +207,7 @@ public class ExpandableLayout extends LinearLayout {
         for (int i = 0; i < children.size(); i++) {
             View childView = layoutInflater.inflate(childLayout, parentView, false);
             renderer.renderChild(childView, children.get(i), parentIndex, firstPosition + i);
+            childView.setVisibility(sections.get(parentIndex).expanded ? View.VISIBLE : View.GONE);
             parentView.addView(childView);
         }
     }
