@@ -32,22 +32,24 @@ public class ExpandableLayoutTest {
                 .addAttribute(R.attr.childLayout, "@layout/expandable_test_child")
                 .build();
         layout = new ExpandableLayout(activity, attrs);
-        layout.setRenderer(new ExpandableLayout.Renderer<String, String>() {
-            @Override
-            public void renderParent(View view, String model, boolean isExpanded, int parentPosition) {
-                ((TextView) view).setText(model + (isExpanded ? " -" : " +"));
-            }
-
-            @Override
-            public void renderChild(View view, String model, int parentPosition, int childPosition) {
-                ((TextView) view).setText(model + "@" + parentPosition + ":" + childPosition);
-            }
-        });
+        layout.setRenderer(renderer);
         layout.setExpandListener((ExpandCollapseListener.ExpandListener<String>)
                 (parentIndex, parent, view) -> events.add("expand " + parent));
         layout.setCollapseListener((ExpandCollapseListener.CollapseListener<String>)
                 (parentIndex, parent, view) -> events.add("collapse " + parent));
     }
+
+    private final ExpandableLayout.Renderer<String, String> renderer = new ExpandableLayout.Renderer<String, String>() {
+        @Override
+        public void renderParent(View view, String model, boolean isExpanded, int parentPosition) {
+            ((TextView) view).setText(model + (isExpanded ? " -" : " +"));
+        }
+
+        @Override
+        public void renderChild(View view, String model, int parentPosition, int childPosition) {
+            ((TextView) view).setText(model + "@" + parentPosition + ":" + childPosition);
+        }
+    };
 
     private static Section<String, String> section(String parent, boolean expanded, String... children) {
         Section<String, String> section = new Section<>();
@@ -194,5 +196,25 @@ public class ExpandableLayoutTest {
 
         assertEquals(Arrays.asList(), events);
         assertEquals(3, visibleChildren(0).size());
+    }
+
+    @Test
+    public void sectionsAddedBeforeRenderer_areRenderedWhenRendererIsSet() {
+        Activity activity = Robolectric.buildActivity(Activity.class).setup().get();
+        layout = new ExpandableLayout(activity, Robolectric.buildAttributeSet()
+                .addAttribute(R.attr.parentLayout, "@layout/expandable_test_parent")
+                .addAttribute(R.attr.childLayout, "@layout/expandable_test_child")
+                .build());
+
+        layout.addSection(section("Fruits", true, "Apple"));
+        layout.addSection(section("Vegetables", false, "Carrot"));
+        layout.addChild("Fruits", "Orange");
+        assertEquals(0, layout.getChildCount());
+
+        layout.setRenderer(renderer);
+
+        assertEquals(2, layout.getChildCount());
+        assertEquals("Vegetables +", ((TextView) parentView(1)).getText().toString());
+        assertEquals(Arrays.asList("Apple@0:0", "Orange@0:1"), visibleChildren(0));
     }
 }

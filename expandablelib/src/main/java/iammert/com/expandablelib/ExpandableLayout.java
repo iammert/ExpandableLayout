@@ -102,13 +102,21 @@ public class ExpandableLayout extends LinearLayout {
         this.collapseListener = collapseListener;
     }
 
+    /**
+     * Sets the renderer and (re)renders every section that was added so far,
+     * so sections may be added before or after the renderer is set.
+     */
     public void setRenderer(@NonNull Renderer renderer) {
         this.renderer = renderer;
+        removeAllViews();
+        for (int i = 0; i < sections.size(); i++) {
+            renderSection(i);
+        }
     }
 
     public void addSection(@NonNull Section section) {
         sections.add(section);
-        notifySectionAdded(section);
+        renderSection(sections.size() - 1);
     }
 
     public List<Section> getSections() {
@@ -212,9 +220,11 @@ public class ExpandableLayout extends LinearLayout {
         }
     }
 
-    private void notifySectionAdded(final Section section) {
+    private void renderSection(int sectionIndex) {
         if (renderer == null)
             return;
+
+        final Section section = sections.get(sectionIndex);
 
         LinearLayout sectionLayout = new LinearLayout(getContext());
         sectionLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
@@ -231,7 +241,7 @@ public class ExpandableLayout extends LinearLayout {
                 }
             }
         });
-        renderer.renderParent(parentView, section.parent, section.expanded, sections.size() - 1);
+        renderer.renderParent(parentView, section.parent, section.expanded, sectionIndex);
         sectionLayout.addView(parentView);
 
         // Children of collapsed sections are inflated too (but hidden),
@@ -239,7 +249,7 @@ public class ExpandableLayout extends LinearLayout {
         for (int i = 0; i < section.children.size(); i++) {
             Object child = section.children.get(i);
             View childView = layoutInflater.inflate(childLayout, sectionLayout, false);
-            renderer.renderChild(childView, child, sections.size() - 1, i);
+            renderer.renderChild(childView, child, sectionIndex, i);
             childView.setVisibility(section.expanded ? View.VISIBLE : View.GONE);
             sectionLayout.addView(childView);
         }
