@@ -277,6 +277,7 @@ public class ExpandableLayout extends LinearLayout {
                     childView.setVisibility(currentFilter.apply(childType) ? View.VISIBLE : View.GONE);
                 }
                 sections.get(i).expanded = true;
+                renderer.renderParent(sectionView.getChildAt(0), sections.get(i).parent, true, i);
                 if (expandListener != null)
                     expandListener.onExpanded(i, sections.get(i).parent, sectionView.getChildAt(0));
                 break;
@@ -293,6 +294,7 @@ public class ExpandableLayout extends LinearLayout {
                 for (int j = 1; j < sectionView.getChildCount(); j++) {
                     sectionView.getChildAt(j).setVisibility(View.GONE);
                 }
+                renderer.renderParent(sectionView.getChildAt(0), sections.get(i).parent, false, i);
 
                 if (collapseListener != null)
                     collapseListener.onCollapsed(i, sections.get(i).parent, sectionView.getChildAt(0));

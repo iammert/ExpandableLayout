@@ -217,4 +217,15 @@ public class ExpandableLayoutTest {
         assertEquals("Vegetables +", ((TextView) parentView(1)).getText().toString());
         assertEquals(Arrays.asList("Apple@0:0", "Orange@0:1"), visibleChildren(0));
     }
+
+    @Test
+    public void toggling_rerendersParentWithNewState() {
+        layout.addSection(section("Fruits", true, "Apple"));
+
+        parentView(0).performClick();
+        assertEquals("Fruits +", ((TextView) parentView(0)).getText().toString());
+
+        parentView(0).performClick();
+        assertEquals("Fruits -", ((TextView) parentView(0)).getText().toString());
+    }
 }
