@@ -184,7 +184,10 @@ public class ExpandableLayout extends LinearLayout {
             for (int i = 0; i < children.size(); i++) {
                 final Object child = children.get(i);
                 final boolean contains = op.apply(child);
-                childrenViews.getChildAt(children.indexOf(child) + 1).setVisibility(contains ? View.VISIBLE : View.GONE);
+                // A collapsed section keeps its children hidden, the filter
+                // is applied again by expand().
+                childrenViews.getChildAt(children.indexOf(child) + 1)
+                        .setVisibility(contains && section.expanded ? View.VISIBLE : View.GONE);
                 if (!keepParentVisible && contains) {
                     keepParentVisible = true;
                 }

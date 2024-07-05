@@ -228,4 +228,16 @@ public class ExpandableLayoutTest {
         parentView(0).performClick();
         assertEquals("Fruits -", ((TextView) parentView(0)).getText().toString());
     }
+
+    @Test
+    public void filterChildren_keepsCollapsedSectionsCollapsed() {
+        layout.addSection(section("Fruits", false, "Apple", "Avocado", "Orange"));
+
+        layout.filterChildren(obj -> ((String) obj).startsWith("A"));
+        assertEquals(View.VISIBLE, sectionView(0).getVisibility());
+        assertEquals(Arrays.asList(), visibleChildren(0));
+
+        parentView(0).performClick();
+        assertEquals(Arrays.asList("Apple@0:0", "Avocado@0:1"), visibleChildren(0));
+    }
 }
