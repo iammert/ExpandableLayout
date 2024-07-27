@@ -167,33 +167,27 @@ public class ExpandableLayout extends LinearLayout {
     }
 
     public void filterParent(@NonNull Operation op) {
-        for (Section section : getSections()) {
-            final Object parent = section.parent;
-            final boolean contains = op.apply(parent);
-            getChildAt(sections.indexOf(section)).setVisibility(contains ? View.VISIBLE : View.GONE);
+        for (int i = 0; i < sections.size(); i++) {
+            final boolean contains = op.apply(sections.get(i).parent);
+            getChildAt(i).setVisibility(contains ? View.VISIBLE : View.GONE);
         }
     }
 
-
     public void filterChildren(@NonNull Operation op) {
         currentFilter = op;
-        for (Section section : getSections()) {
-            final List children = section.children;
-            boolean keepParentVisible = false;
-            final ViewGroup childrenViews = (ViewGroup) getChildAt(sections.indexOf(section));
-            for (int i = 0; i < children.size(); i++) {
-                final Object child = children.get(i);
-                final boolean contains = op.apply(child);
+        for (int i = 0; i < sections.size(); i++) {
+            final Section section = sections.get(i);
+            final ViewGroup sectionView = (ViewGroup) getChildAt(i);
+            boolean keepSectionVisible = false;
+            for (int j = 0; j < section.children.size(); j++) {
+                final boolean contains = op.apply(section.children.get(j));
                 // A collapsed section keeps its children hidden, the filter
                 // is applied again by expand().
-                childrenViews.getChildAt(children.indexOf(child) + 1)
+                sectionView.getChildAt(j + 1)
                         .setVisibility(contains && section.expanded ? View.VISIBLE : View.GONE);
-                if (!keepParentVisible && contains) {
-                    keepParentVisible = true;
-                }
-
+                keepSectionVisible |= contains;
             }
-            childrenViews.setVisibility(keepParentVisible ? View.VISIBLE : View.GONE);
+            sectionView.setVisibility(keepSectionVisible ? View.VISIBLE : View.GONE);
         }
     }
 
@@ -237,10 +231,13 @@ public class ExpandableLayout extends LinearLayout {
         parentView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (section.expanded) {
-                    collapse(section.parent);
+                // Look the section up by position, parents are not required
+                // to be unique (or to implement equals()).
+                int index = indexOfChild((View) view.getParent());
+                if (sections.get(index).expanded) {
+                    collapseSection(index);
                 } else {
-                    expand(section.parent);
+                    expandSection(index);
                 }
             }
         });
@@ -271,38 +268,41 @@ public class ExpandableLayout extends LinearLayout {
     }
 
     private <P> void expand(@NonNull P parent) {
-        for (int i = 0; i < sections.size(); i++) {
-            if (parent.equals(sections.get(i).parent)) {
-                ViewGroup sectionView = ((ViewGroup) getChildAt(i));
-                for (int j = 1; j < sectionView.getChildCount(); j++) {
-                    final View childView = sectionView.getChildAt(j);
-                    final Object childType = sections.get(i).children.get(j - 1);
-                    childView.setVisibility(currentFilter.apply(childType) ? View.VISIBLE : View.GONE);
-                }
-                sections.get(i).expanded = true;
-                renderer.renderParent(sectionView.getChildAt(0), sections.get(i).parent, true, i);
-                if (expandListener != null)
-                    expandListener.onExpanded(i, sections.get(i).parent, sectionView.getChildAt(0));
-                break;
-            }
+        int index = indexOfParent(parent);
+        if (index != NO_INDEX) {
+            expandSection(index);
         }
     }
 
     private <P> void collapse(@NonNull P parent) {
-        for (int i = 0; i < sections.size(); i++) {
-            if (parent.equals(sections.get(i).parent)) {
-                ViewGroup sectionView = ((ViewGroup) getChildAt(i));
-                sections.get(i).expanded = false;
-
-                for (int j = 1; j < sectionView.getChildCount(); j++) {
-                    sectionView.getChildAt(j).setVisibility(View.GONE);
-                }
-                renderer.renderParent(sectionView.getChildAt(0), sections.get(i).parent, false, i);
-
-                if (collapseListener != null)
-                    collapseListener.onCollapsed(i, sections.get(i).parent, sectionView.getChildAt(0));
-                break;
-            }
+        int index = indexOfParent(parent);
+        if (index != NO_INDEX) {
+            collapseSection(index);
         }
+    }
+
+    private void expandSection(int index) {
+        final Section section = sections.get(index);
+        final ViewGroup sectionView = (ViewGroup) getChildAt(index);
+        for (int j = 1; j < sectionView.getChildCount(); j++) {
+            final Object child = section.children.get(j - 1);
+            sectionView.getChildAt(j).setVisibility(currentFilter.apply(child) ? View.VISIBLE : View.GONE);
+        }
+        section.expanded = true;
+        renderer.renderParent(sectionView.getChildAt(0), section.parent, true, index);
+        if (expandListener != null)
+            expandListener.onExpanded(index, section.parent, sectionView.getChildAt(0));
+    }
+
+    private void collapseSection(int index) {
+        final Section section = sections.get(index);
+        final ViewGroup sectionView = (ViewGroup) getChildAt(index);
+        section.expanded = false;
+        for (int j = 1; j < sectionView.getChildCount(); j++) {
+            sectionView.getChildAt(j).setVisibility(View.GONE);
+        }
+        renderer.renderParent(sectionView.getChildAt(0), section.parent, false, index);
+        if (collapseListener != null)
+            collapseListener.onCollapsed(index, section.parent, sectionView.getChildAt(0));
     }
 }

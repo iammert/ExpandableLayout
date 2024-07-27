@@ -240,4 +240,24 @@ public class ExpandableLayoutTest {
         parentView(0).performClick();
         assertEquals(Arrays.asList("Apple@0:0", "Avocado@0:1"), visibleChildren(0));
     }
+
+    @Test
+    public void filterChildren_handlesEqualChildren() {
+        layout.addSection(section("Fruits", true, "Apple", "Apple", "Orange"));
+
+        layout.filterChildren(obj -> obj.equals("Orange"));
+
+        assertEquals(Arrays.asList("Orange@0:2"), visibleChildren(0));
+    }
+
+    @Test
+    public void clickingParent_togglesTheClickedSectionWhenParentsAreEqual() {
+        layout.addSection(section("Fruits", true, "Apple"));
+        layout.addSection(section("Fruits", true, "Orange"));
+
+        parentView(1).performClick();
+
+        assertEquals(Arrays.asList("Apple@0:0"), visibleChildren(0));
+        assertEquals(Arrays.asList(), visibleChildren(1));
+    }
 }
