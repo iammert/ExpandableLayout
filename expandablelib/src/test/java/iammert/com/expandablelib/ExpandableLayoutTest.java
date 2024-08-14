@@ -260,4 +260,31 @@ public class ExpandableLayoutTest {
         assertEquals(Arrays.asList("Apple@0:0"), visibleChildren(0));
         assertEquals(Arrays.asList(), visibleChildren(1));
     }
+
+    @Test
+    public void addedChildren_respectCurrentFilter() {
+        layout.addSection(section("Fruits", true, "Apple"));
+        layout.filterChildren(obj -> ((String) obj).startsWith("A"));
+
+        layout.addChild("Fruits", "Orange");
+        layout.addChildren("Fruits", Arrays.asList("Avocado", "Banana"));
+        layout.addSection(section("More", true, "Apricot", "Cherry"));
+
+        assertEquals(Arrays.asList("Apple@0:0", "Avocado@0:2"), visibleChildren(0));
+        assertEquals(Arrays.asList("Apricot@1:0"), visibleChildren(1));
+    }
+
+    @Test
+    public void clearFilter_showsEverythingAgain() {
+        layout.addSection(section("Fruits", true, "Apple", "Orange"));
+        layout.addSection(section("Vegetables", true, "Carrot"));
+        layout.filterParent(obj -> obj.equals("Fruits"));
+        layout.filterChildren(obj -> obj.equals("Apple"));
+
+        layout.clearFilter();
+
+        assertEquals(View.VISIBLE, sectionView(0).getVisibility());
+        assertEquals(View.VISIBLE, sectionView(1).getVisibility());
+        assertEquals(Arrays.asList("Apple@0:0", "Orange@0:1"), visibleChildren(0));
+    }
 }
