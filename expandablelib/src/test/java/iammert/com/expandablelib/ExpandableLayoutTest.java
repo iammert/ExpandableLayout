@@ -287,4 +287,39 @@ public class ExpandableLayoutTest {
         assertEquals(View.VISIBLE, sectionView(1).getVisibility());
         assertEquals(Arrays.asList("Apple@0:0", "Orange@0:1"), visibleChildren(0));
     }
+
+    @Test
+    public void expandAndCollapse_canBeCalledFromCode() {
+        layout.addSection(section("Fruits", false, "Apple"));
+        layout.addSection(section("Vegetables", true, "Carrot"));
+
+        layout.expand(0);
+        layout.collapse("Vegetables");
+
+        assertEquals(true, layout.isExpanded(0));
+        assertEquals(false, layout.isExpanded(1));
+        assertEquals(Arrays.asList("Apple@0:0"), visibleChildren(0));
+        assertEquals(Arrays.asList(), visibleChildren(1));
+        assertEquals(Arrays.asList("expand Fruits", "collapse Vegetables"), events);
+    }
+
+    @Test
+    public void expand_isNoOpWhenAlreadyExpanded() {
+        layout.addSection(section("Fruits", true, "Apple"));
+
+        layout.expand(0);
+        layout.collapse(0);
+        layout.collapse(0);
+
+        assertEquals(Arrays.asList("collapse Fruits"), events);
+    }
+
+    @Test
+    public void toggle_switchesState() {
+        layout.addSection(section("Fruits", false, "Apple"));
+
+        layout.toggle(0);
+
+        assertEquals(true, layout.isExpanded(0));
+    }
 }

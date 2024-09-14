@@ -247,12 +247,7 @@ public class ExpandableLayout extends LinearLayout {
             public void onClick(View view) {
                 // Look the section up by position, parents are not required
                 // to be unique (or to implement equals()).
-                int index = indexOfChild((View) view.getParent());
-                if (sections.get(index).expanded) {
-                    collapseSection(index);
-                } else {
-                    expandSection(index);
-                }
+                toggle(indexOfChild((View) view.getParent()));
             }
         });
         renderer.renderParent(parentView, section.parent, section.expanded, sectionIndex);
@@ -281,28 +276,62 @@ public class ExpandableLayout extends LinearLayout {
         }
     }
 
-    private <P> void expand(@NonNull P parent) {
+    /**
+     * Expands the first section whose parent equals the given one.
+     */
+    public <P> void expand(@NonNull P parent) {
         int index = indexOfParent(parent);
         if (index != NO_INDEX) {
-            expandSection(index);
+            expand(index);
         }
     }
 
-    private <P> void collapse(@NonNull P parent) {
+    /**
+     * Collapses the first section whose parent equals the given one.
+     */
+    public <P> void collapse(@NonNull P parent) {
         int index = indexOfParent(parent);
         if (index != NO_INDEX) {
-            collapseSection(index);
+            collapse(index);
         }
+    }
+
+    public void expand(int sectionIndex) {
+        if (!sections.get(sectionIndex).expanded) {
+            expandSection(sectionIndex);
+        }
+    }
+
+    public void collapse(int sectionIndex) {
+        if (sections.get(sectionIndex).expanded) {
+            collapseSection(sectionIndex);
+        }
+    }
+
+    public void toggle(int sectionIndex) {
+        if (isExpanded(sectionIndex)) {
+            collapseSection(sectionIndex);
+        } else {
+            expandSection(sectionIndex);
+        }
+    }
+
+    public boolean isExpanded(int sectionIndex) {
+        return sections.get(sectionIndex).expanded;
     }
 
     private void expandSection(int index) {
         final Section section = sections.get(index);
+        section.expanded = true;
         final ViewGroup sectionView = (ViewGroup) getChildAt(index);
+        if (sectionView == null) {
+            // Not rendered yet, setRenderer() will use the new state.
+            return;
+        }
         for (int j = 1; j < sectionView.getChildCount(); j++) {
             final Object child = section.children.get(j - 1);
             sectionView.getChildAt(j).setVisibility(currentFilter.apply(child) ? View.VISIBLE : View.GONE);
         }
-        section.expanded = true;
         renderer.renderParent(sectionView.getChildAt(0), section.parent, true, index);
         if (expandListener != null)
             expandListener.onExpanded(index, section.parent, sectionView.getChildAt(0));
@@ -310,8 +339,11 @@ public class ExpandableLayout extends LinearLayout {
 
     private void collapseSection(int index) {
         final Section section = sections.get(index);
-        final ViewGroup sectionView = (ViewGroup) getChildAt(index);
         section.expanded = false;
+        final ViewGroup sectionView = (ViewGroup) getChildAt(index);
+        if (sectionView == null) {
+            return;
+        }
         for (int j = 1; j < sectionView.getChildCount(); j++) {
             sectionView.getChildAt(j).setVisibility(View.GONE);
         }
