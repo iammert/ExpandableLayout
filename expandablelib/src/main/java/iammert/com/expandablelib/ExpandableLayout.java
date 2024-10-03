@@ -316,6 +316,18 @@ public class ExpandableLayout extends LinearLayout {
         }
     }
 
+    public void expandAll() {
+        for (int i = 0; i < sections.size(); i++) {
+            expand(i);
+        }
+    }
+
+    public void collapseAll() {
+        for (int i = 0; i < sections.size(); i++) {
+            collapse(i);
+        }
+    }
+
     public boolean isExpanded(int sectionIndex) {
         return sections.get(sectionIndex).expanded;
     }

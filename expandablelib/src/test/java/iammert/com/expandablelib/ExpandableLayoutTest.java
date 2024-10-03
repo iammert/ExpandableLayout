@@ -322,4 +322,19 @@ public class ExpandableLayoutTest {
 
         assertEquals(true, layout.isExpanded(0));
     }
+
+    @Test
+    public void expandAllAndCollapseAll_changeEverySection() {
+        layout.addSection(section("Fruits", false, "Apple"));
+        layout.addSection(section("Vegetables", true, "Carrot"));
+
+        layout.expandAll();
+        assertEquals(Arrays.asList("Apple@0:0"), visibleChildren(0));
+        assertEquals(Arrays.asList("Carrot@1:0"), visibleChildren(1));
+
+        layout.collapseAll();
+        assertEquals(Arrays.asList(), visibleChildren(0));
+        assertEquals(Arrays.asList(), visibleChildren(1));
+        assertEquals(Arrays.asList("expand Fruits", "collapse Fruits", "collapse Vegetables"), events);
+    }
 }
