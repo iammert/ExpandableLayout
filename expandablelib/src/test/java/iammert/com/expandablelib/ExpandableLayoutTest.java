@@ -1,6 +1,8 @@
 package iammert.com.expandablelib;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import android.app.Activity;
 import android.util.AttributeSet;
@@ -336,5 +338,29 @@ public class ExpandableLayoutTest {
         assertEquals(Arrays.asList(), visibleChildren(0));
         assertEquals(Arrays.asList(), visibleChildren(1));
         assertEquals(Arrays.asList("expand Fruits", "collapse Fruits", "collapse Vegetables"), events);
+    }
+
+    @Test
+    public void layoutsCanBeSetFromCode() {
+        Activity activity = Robolectric.buildActivity(Activity.class).setup().get();
+        layout = new ExpandableLayout(activity);
+        layout.setParentLayout(R.layout.expandable_test_parent);
+        layout.setChildLayout(R.layout.expandable_test_child);
+        layout.setRenderer(renderer);
+
+        layout.addSection(section("Fruits", true, "Apple"));
+
+        assertEquals(Arrays.asList("Apple@0:0"), visibleChildren(0));
+    }
+
+    @Test
+    public void missingLayout_failsWithDescriptiveError() {
+        Activity activity = Robolectric.buildActivity(Activity.class).setup().get();
+        layout = new ExpandableLayout(activity);
+        layout.setRenderer(renderer);
+
+        IllegalStateException error = assertThrows(IllegalStateException.class,
+                () -> layout.addSection(section("Fruits", true, "Apple")));
+        assertTrue(error.getMessage().contains("app:parentLayout"));
     }
 }

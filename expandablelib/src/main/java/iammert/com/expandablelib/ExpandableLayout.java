@@ -94,6 +94,22 @@ public class ExpandableLayout extends LinearLayout {
         }
     }
 
+    /**
+     * Layout inflated for every parent row, same as {@code app:parentLayout}.
+     */
+    public void setParentLayout(@LayoutRes int parentLayout) {
+        this.parentLayout = parentLayout;
+        rerender();
+    }
+
+    /**
+     * Layout inflated for every child row, same as {@code app:childLayout}.
+     */
+    public void setChildLayout(@LayoutRes int childLayout) {
+        this.childLayout = childLayout;
+        rerender();
+    }
+
     public <P> void setExpandListener(ExpandCollapseListener.ExpandListener<P> expandListener) {
         this.expandListener = expandListener;
     }
@@ -108,6 +124,13 @@ public class ExpandableLayout extends LinearLayout {
      */
     public void setRenderer(@NonNull Renderer renderer) {
         this.renderer = renderer;
+        rerender();
+    }
+
+    private void rerender() {
+        if (renderer == null) {
+            return;
+        }
         removeAllViews();
         for (int i = 0; i < sections.size(); i++) {
             renderSection(i);
@@ -205,6 +228,17 @@ public class ExpandableLayout extends LinearLayout {
         return section.expanded && currentFilter.apply(child);
     }
 
+    private void checkLayouts() {
+        if (parentLayout == NO_RES) {
+            throw new IllegalStateException("ExpandableLayout has no parent layout. "
+                    + "Set app:parentLayout in XML or call setParentLayout().");
+        }
+        if (childLayout == NO_RES) {
+            throw new IllegalStateException("ExpandableLayout has no child layout. "
+                    + "Set app:childLayout in XML or call setChildLayout().");
+        }
+    }
+
     private <C> void notifyItemAdded(int parentIndex, C child) {
         if (renderer == null) {
             return;
@@ -234,6 +268,7 @@ public class ExpandableLayout extends LinearLayout {
     private void renderSection(int sectionIndex) {
         if (renderer == null)
             return;
+        checkLayouts();
 
         final Section section = sections.get(sectionIndex);
 
