@@ -300,8 +300,13 @@ public class ExpandableLayout extends LinearLayout {
         addView(sectionLayout);
     }
 
+    /**
+     * Renders the parent row of the section at the given position again,
+     * e.g. after its model changed. Invalid positions are ignored.
+     */
     public void notifyParentChanged(int position) {
-        if (position > getChildCount() - 1) {
+        if (renderer == null || position < 0 || position >= sections.size()
+                || position >= getChildCount()) {
             return;
         }
         ViewGroup viewGroup = (ViewGroup) getChildAt(position);

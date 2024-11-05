@@ -363,4 +363,28 @@ public class ExpandableLayoutTest {
                 () -> layout.addSection(section("Fruits", true, "Apple")));
         assertTrue(error.getMessage().contains("app:parentLayout"));
     }
+
+    @Test
+    public void notifyParentChanged_rendersParentAgain() {
+        Section<String, String> section = section("Fruits", true, "Apple");
+        layout.addSection(section);
+
+        section.parent = "Berries";
+        layout.notifyParentChanged(0);
+
+        assertEquals("Berries -", ((TextView) parentView(0)).getText().toString());
+    }
+
+    @Test
+    public void notifyParentChanged_ignoresInvalidPositions() {
+        layout.addSection(section("Fruits", true, "Apple"));
+
+        layout.notifyParentChanged(-1);
+        layout.notifyParentChanged(1);
+
+        Activity activity = Robolectric.buildActivity(Activity.class).setup().get();
+        ExpandableLayout withoutRenderer = new ExpandableLayout(activity);
+        withoutRenderer.addSection(section("Fruits", true, "Apple"));
+        withoutRenderer.notifyParentChanged(0);
+    }
 }
