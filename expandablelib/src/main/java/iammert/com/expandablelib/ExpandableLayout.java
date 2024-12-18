@@ -57,6 +57,8 @@ public class ExpandableLayout extends LinearLayout {
 
     private Operation currentFilter = DEFAULT_FILTER;
 
+    private Operation currentParentFilter = DEFAULT_FILTER;
+
     public ExpandableLayout(Context context) {
         super(context);
         init(context, null);
@@ -189,39 +191,61 @@ public class ExpandableLayout extends LinearLayout {
         return NO_INDEX;
     }
 
+    /**
+     * Shows only the sections whose parent matches. The filter stays active
+     * for sections added later and is combined with {@link #filterChildren}.
+     */
     public void filterParent(@NonNull Operation op) {
-        for (int i = 0; i < sections.size(); i++) {
-            final boolean contains = op.apply(sections.get(i).parent);
-            getChildAt(i).setVisibility(contains ? View.VISIBLE : View.GONE);
+        currentParentFilter = op;
+        for (int i = 0; i < getChildCount(); i++) {
+            updateSectionVisibility(i);
         }
     }
 
+    /**
+     * Shows only the children that match. Sections without any matching
+     * child are hidden. The filter stays active for children added later.
+     */
     public void filterChildren(@NonNull Operation op) {
         currentFilter = op;
-        for (int i = 0; i < sections.size(); i++) {
+        for (int i = 0; i < getChildCount(); i++) {
             final Section section = sections.get(i);
             final ViewGroup sectionView = (ViewGroup) getChildAt(i);
-            boolean keepSectionVisible = false;
             for (int j = 0; j < section.children.size(); j++) {
-                final boolean contains = op.apply(section.children.get(j));
                 // A collapsed section keeps its children hidden, the filter
                 // is applied again by expand().
-                sectionView.getChildAt(j + 1)
-                        .setVisibility(contains && section.expanded ? View.VISIBLE : View.GONE);
-                keepSectionVisible |= contains;
+                sectionView.getChildAt(j + 1).setVisibility(
+                        isChildVisible(section, section.children.get(j)) ? View.VISIBLE : View.GONE);
             }
-            sectionView.setVisibility(keepSectionVisible ? View.VISIBLE : View.GONE);
+            updateSectionVisibility(i);
         }
+    }
+
+    private void updateSectionVisibility(int index) {
+        getChildAt(index).setVisibility(isSectionVisible(sections.get(index)) ? View.VISIBLE : View.GONE);
+    }
+
+    private boolean isSectionVisible(Section section) {
+        if (!currentParentFilter.apply(section.parent)) {
+            return false;
+        }
+        if (currentFilter == DEFAULT_FILTER) {
+            return true;
+        }
+        for (Object child : section.children) {
+            if (currentFilter.apply(child)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
      * Removes the parent and children filters and shows every section again.
      */
     public void clearFilter() {
+        currentParentFilter = DEFAULT_FILTER;
         filterChildren(DEFAULT_FILTER);
-        for (int i = 0; i < getChildCount(); i++) {
-            getChildAt(i).setVisibility(View.VISIBLE);
-        }
     }
 
     private boolean isChildVisible(Section section, Object child) {
@@ -248,6 +272,7 @@ public class ExpandableLayout extends LinearLayout {
         renderer.renderChild(childView, child, parentIndex, sections.get(parentIndex).children.size() - 1);
         childView.setVisibility(isChildVisible(sections.get(parentIndex), child) ? View.VISIBLE : View.GONE);
         parentView.addView(childView);
+        updateSectionVisibility(parentIndex);
     }
 
     private <C> void notifyItemAdded(int parentIndex, List<C> children) {
@@ -263,6 +288,7 @@ public class ExpandableLayout extends LinearLayout {
             childView.setVisibility(isChildVisible(sections.get(parentIndex), children.get(i)) ? View.VISIBLE : View.GONE);
             parentView.addView(childView);
         }
+        updateSectionVisibility(parentIndex);
     }
 
     private void renderSection(int sectionIndex) {
@@ -297,6 +323,7 @@ public class ExpandableLayout extends LinearLayout {
             childView.setVisibility(isChildVisible(section, child) ? View.VISIBLE : View.GONE);
             sectionLayout.addView(childView);
         }
+        sectionLayout.setVisibility(isSectionVisible(section) ? View.VISIBLE : View.GONE);
         addView(sectionLayout);
     }
 

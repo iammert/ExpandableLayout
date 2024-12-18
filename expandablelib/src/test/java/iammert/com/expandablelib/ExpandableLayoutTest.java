@@ -387,4 +387,39 @@ public class ExpandableLayoutTest {
         withoutRenderer.addSection(section("Fruits", true, "Apple"));
         withoutRenderer.notifyParentChanged(0);
     }
+
+    @Test
+    public void filterChildren_doesNotShowSectionsHiddenByParentFilter() {
+        layout.addSection(section("Fruits", true, "Apple"));
+        layout.addSection(section("Vegetables", true, "Asparagus"));
+        layout.filterParent(obj -> obj.equals("Fruits"));
+
+        layout.filterChildren(obj -> ((String) obj).startsWith("A"));
+
+        assertEquals(View.VISIBLE, sectionView(0).getVisibility());
+        assertEquals(View.GONE, sectionView(1).getVisibility());
+    }
+
+    @Test
+    public void parentFilter_appliesToSectionsAddedLater() {
+        layout.filterParent(obj -> obj.equals("Fruits"));
+
+        layout.addSection(section("Fruits", true, "Apple"));
+        layout.addSection(section("Vegetables", true, "Carrot"));
+
+        assertEquals(View.VISIBLE, sectionView(0).getVisibility());
+        assertEquals(View.GONE, sectionView(1).getVisibility());
+    }
+
+    @Test
+    public void addingMatchingChild_showsSectionHiddenByChildFilter() {
+        layout.addSection(section("Fruits", true, "Orange"));
+        layout.filterChildren(obj -> ((String) obj).startsWith("A"));
+        assertEquals(View.GONE, sectionView(0).getVisibility());
+
+        layout.addChild("Fruits", "Apple");
+
+        assertEquals(View.VISIBLE, sectionView(0).getVisibility());
+        assertEquals(Arrays.asList("Apple@0:1"), visibleChildren(0));
+    }
 }
