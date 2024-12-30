@@ -144,6 +144,51 @@ public class ExpandableLayout extends LinearLayout {
         renderSection(sections.size() - 1);
     }
 
+    /**
+     * Removes the section at the given position.
+     */
+    public void removeSection(int sectionIndex) {
+        sections.remove(sectionIndex);
+        if (renderer == null) {
+            return;
+        }
+        // Sections after the removed one get new positions, render them
+        // again so renderers receive up to date positions.
+        removeViews(sectionIndex, getChildCount() - sectionIndex);
+        for (int i = sectionIndex; i < sections.size(); i++) {
+            renderSection(i);
+        }
+    }
+
+    /**
+     * Removes the first section whose parent equals the given one.
+     */
+    public <P> void removeSection(@NonNull P parent) {
+        int index = indexOfParent(parent);
+        if (index != NO_INDEX) {
+            removeSection(index);
+        }
+    }
+
+    public void removeAllSections() {
+        sections.clear();
+        removeAllViews();
+    }
+
+    /**
+     * Removes a child from the first section whose parent equals the given one.
+     */
+    public <P, C> void removeChild(@NonNull P parent, C child) {
+        int index = indexOfParent(parent);
+        if (index == NO_INDEX || !sections.get(index).children.remove(child)) {
+            return;
+        }
+        if (renderer != null) {
+            removeViewAt(index);
+            renderSection(index);
+        }
+    }
+
     public List<Section> getSections() {
         return sections;
     }
@@ -324,7 +369,7 @@ public class ExpandableLayout extends LinearLayout {
             sectionLayout.addView(childView);
         }
         sectionLayout.setVisibility(isSectionVisible(section) ? View.VISIBLE : View.GONE);
-        addView(sectionLayout);
+        addView(sectionLayout, sectionIndex);
     }
 
     /**

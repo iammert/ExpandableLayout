@@ -422,4 +422,42 @@ public class ExpandableLayoutTest {
         assertEquals(View.VISIBLE, sectionView(0).getVisibility());
         assertEquals(Arrays.asList("Apple@0:1"), visibleChildren(0));
     }
+
+    @Test
+    public void removeSection_rendersFollowingSectionsWithNewPositions() {
+        layout.addSection(section("Fruits", true, "Apple"));
+        layout.addSection(section("Vegetables", true, "Carrot"));
+        layout.addSection(section("Nuts", false, "Walnut"));
+
+        layout.removeSection(0);
+
+        assertEquals(2, layout.getSections().size());
+        assertEquals(2, layout.getChildCount());
+        assertEquals(Arrays.asList("Carrot@0:0"), visibleChildren(0));
+        assertEquals("Nuts +", ((TextView) parentView(1)).getText().toString());
+
+        parentView(1).performClick();
+        assertEquals(Arrays.asList("Walnut@1:0"), visibleChildren(1));
+    }
+
+    @Test
+    public void removeChild_removesItsView() {
+        layout.addSection(section("Fruits", true, "Apple", "Orange", "Banana"));
+
+        layout.removeChild("Fruits", "Orange");
+
+        assertEquals(Arrays.asList("Apple", "Banana"), layout.getSections().get(0).children);
+        assertEquals(Arrays.asList("Apple@0:0", "Banana@0:1"), visibleChildren(0));
+    }
+
+    @Test
+    public void removeAllSections_clearsLayout() {
+        layout.addSection(section("Fruits", true, "Apple"));
+        layout.addSection(section("Vegetables", true, "Carrot"));
+
+        layout.removeAllSections();
+
+        assertEquals(0, layout.getSections().size());
+        assertEquals(0, layout.getChildCount());
+    }
 }
