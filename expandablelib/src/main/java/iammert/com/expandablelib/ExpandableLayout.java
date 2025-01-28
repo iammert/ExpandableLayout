@@ -389,6 +389,25 @@ public class ExpandableLayout extends LinearLayout {
     }
 
     /**
+     * Renders a child row again, e.g. after its model changed, and
+     * re-evaluates the active filter for it. Invalid positions are ignored.
+     */
+    public void notifyChildChanged(int parentPosition, int childPosition) {
+        if (renderer == null || parentPosition < 0 || parentPosition >= sections.size()) {
+            return;
+        }
+        Section section = sections.get(parentPosition);
+        if (childPosition < 0 || childPosition >= section.children.size()) {
+            return;
+        }
+        Object child = section.children.get(childPosition);
+        View childView = ((ViewGroup) getChildAt(parentPosition)).getChildAt(childPosition + 1);
+        renderer.renderChild(childView, child, parentPosition, childPosition);
+        childView.setVisibility(isChildVisible(section, child) ? View.VISIBLE : View.GONE);
+        updateSectionVisibility(parentPosition);
+    }
+
+    /**
      * Expands the first section whose parent equals the given one.
      */
     public <P> void expand(@NonNull P parent) {

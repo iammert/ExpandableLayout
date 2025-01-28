@@ -460,4 +460,16 @@ public class ExpandableLayoutTest {
         assertEquals(0, layout.getSections().size());
         assertEquals(0, layout.getChildCount());
     }
+
+    @Test
+    public void notifyChildChanged_rendersChildAgain() {
+        Section<String, String> section = section("Fruits", true, "Apple", "Orange");
+        layout.addSection(section);
+
+        section.children.set(1, "Mandarin");
+        layout.notifyChildChanged(0, 1);
+        layout.notifyChildChanged(0, 5);
+
+        assertEquals(Arrays.asList("Apple@0:0", "Mandarin@0:1"), visibleChildren(0));
+    }
 }
