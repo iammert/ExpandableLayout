@@ -472,4 +472,27 @@ public class ExpandableLayoutTest {
 
         assertEquals(Arrays.asList("Apple@0:0", "Mandarin@0:1"), visibleChildren(0));
     }
+
+    @Test
+    public void singleExpansion_collapsesOtherSections() {
+        layout.setSingleExpansion(true);
+        layout.addSection(section("Fruits", true, "Apple"));
+        layout.addSection(section("Vegetables", false, "Carrot"));
+
+        parentView(1).performClick();
+
+        assertEquals(false, layout.isExpanded(0));
+        assertEquals(true, layout.isExpanded(1));
+        assertEquals(Arrays.asList("collapse Fruits", "expand Vegetables"), events);
+    }
+
+    @Test
+    public void singleExpansion_canBeSetFromXml() {
+        Activity activity = Robolectric.buildActivity(Activity.class).setup().get();
+        ExpandableLayout fromXml = new ExpandableLayout(activity, Robolectric.buildAttributeSet()
+                .addAttribute(R.attr.singleExpansion, "true")
+                .build());
+
+        assertTrue(fromXml.isSingleExpansion());
+    }
 }

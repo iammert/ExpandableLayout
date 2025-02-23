@@ -59,6 +59,8 @@ public class ExpandableLayout extends LinearLayout {
 
     private Operation currentParentFilter = DEFAULT_FILTER;
 
+    private boolean singleExpansion;
+
     public ExpandableLayout(Context context) {
         super(context);
         init(context, null);
@@ -88,6 +90,7 @@ public class ExpandableLayout extends LinearLayout {
             typedArray = context.obtainStyledAttributes(attributeSet, R.styleable.ExpandableLayout);
             parentLayout = typedArray.getResourceId(R.styleable.ExpandableLayout_parentLayout, NO_RES);
             childLayout = typedArray.getResourceId(R.styleable.ExpandableLayout_childLayout, NO_RES);
+            singleExpansion = typedArray.getBoolean(R.styleable.ExpandableLayout_singleExpansion, false);
             layoutInflater = LayoutInflater.from(context);
         } finally {
             if (typedArray != null) {
@@ -110,6 +113,18 @@ public class ExpandableLayout extends LinearLayout {
     public void setChildLayout(@LayoutRes int childLayout) {
         this.childLayout = childLayout;
         rerender();
+    }
+
+    /**
+     * When enabled, expanding a section collapses every other expanded
+     * section (accordion behaviour). Same as {@code app:singleExpansion}.
+     */
+    public void setSingleExpansion(boolean singleExpansion) {
+        this.singleExpansion = singleExpansion;
+    }
+
+    public boolean isSingleExpansion() {
+        return singleExpansion;
     }
 
     public <P> void setExpandListener(ExpandCollapseListener.ExpandListener<P> expandListener) {
@@ -464,6 +479,13 @@ public class ExpandableLayout extends LinearLayout {
     }
 
     private void expandSection(int index) {
+        if (singleExpansion) {
+            for (int i = 0; i < sections.size(); i++) {
+                if (i != index && sections.get(i).expanded) {
+                    collapseSection(i);
+                }
+            }
+        }
         final Section section = sections.get(index);
         section.expanded = true;
         final ViewGroup sectionView = (ViewGroup) getChildAt(index);

@@ -4,6 +4,8 @@
     <declare-styleable name="ExpandableLayout">
         <attr name="parentLayout" format="reference" />
         <attr name="childLayout" format="reference" />
+        <!-- Collapse the other sections when one is expanded. -->
+        <attr name="singleExpansion" format="boolean" />
     </declare-styleable>
 
 </resources>
