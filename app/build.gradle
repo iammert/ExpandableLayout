@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace 'iammert.com.expandablelayout'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId 'iammert.com.expandablelayout'
         minSdk 21
-        targetSdk 34
+        targetSdk 35
         versionCode 1
         versionName '1.0'
     }
@@ -29,5 +29,5 @@ android {
 
 dependencies {
     implementation project(':expandablelib')
-    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
 }
