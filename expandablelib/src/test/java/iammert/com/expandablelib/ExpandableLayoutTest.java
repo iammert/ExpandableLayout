@@ -5,6 +5,8 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import android.app.Activity;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -494,5 +496,65 @@ public class ExpandableLayoutTest {
                 .build());
 
         assertTrue(fromXml.isSingleExpansion());
+    }
+
+    private static Parcelable parcel(Parcelable state) {
+        Parcel parcel = Parcel.obtain();
+        try {
+            parcel.writeParcelable(state, 0);
+            parcel.setDataPosition(0);
+            return parcel.readParcelable(ExpandableLayout.class.getClassLoader());
+        } finally {
+            parcel.recycle();
+        }
+    }
+
+    private ExpandableLayout newLayout() {
+        Activity activity = Robolectric.buildActivity(Activity.class).setup().get();
+        ExpandableLayout restored = new ExpandableLayout(activity);
+        restored.setParentLayout(R.layout.expandable_test_parent);
+        restored.setChildLayout(R.layout.expandable_test_child);
+        restored.setRenderer(renderer);
+        return restored;
+    }
+
+    @Test
+    public void expandedStates_areRestoredForExistingSections() {
+        layout.addSection(section("Fruits", true, "Apple"));
+        layout.addSection(section("Vegetables", false, "Carrot"));
+        layout.collapse(0);
+        layout.expand(1);
+        Parcelable state = parcel(layout.onSaveInstanceState());
+
+        layout = newLayout();
+        layout.addSection(section("Fruits", true, "Apple"));
+        layout.addSection(section("Vegetables", false, "Carrot"));
+        events.clear();
+        layout.onRestoreInstanceState(state);
+
+        assertEquals(false, layout.isExpanded(0));
+        assertEquals(true, layout.isExpanded(1));
+        assertEquals(Arrays.asList(), visibleChildren(0));
+        assertEquals(Arrays.asList("Carrot@1:0"), visibleChildren(1));
+        assertEquals(Arrays.asList(), events);
+    }
+
+    @Test
+    public void expandedStates_areAppliedToSectionsAddedAfterRestore() {
+        layout.addSection(section("Fruits", true, "Apple"));
+        layout.addSection(section("Vegetables", false, "Carrot"));
+        layout.collapse(0);
+        layout.expand(1);
+        Parcelable state = parcel(layout.onSaveInstanceState());
+
+        layout = newLayout();
+        layout.onRestoreInstanceState(state);
+        layout.addSection(section("Fruits", true, "Apple"));
+        layout.addSection(section("Vegetables", false, "Carrot"));
+        layout.addSection(section("Nuts", true, "Walnut"));
+
+        assertEquals(false, layout.isExpanded(0));
+        assertEquals(true, layout.isExpanded(1));
+        assertEquals(true, layout.isExpanded(2));
     }
 }

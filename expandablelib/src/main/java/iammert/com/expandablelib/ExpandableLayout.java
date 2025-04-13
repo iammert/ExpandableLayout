@@ -4,6 +4,8 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Build;
+import android.os.Parcel;
+import android.os.Parcelable;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -60,6 +62,13 @@ public class ExpandableLayout extends LinearLayout {
     private Operation currentParentFilter = DEFAULT_FILTER;
 
     private boolean singleExpansion;
+
+    /**
+     * Restored expanded states for sections that were not added yet
+     * when the instance state was restored.
+     */
+    @Nullable
+    private boolean[] pendingExpandedStates;
 
     public ExpandableLayout(Context context) {
         super(context);
@@ -156,7 +165,16 @@ public class ExpandableLayout extends LinearLayout {
 
     public void addSection(@NonNull Section section) {
         sections.add(section);
-        renderSection(sections.size() - 1);
+        int index = sections.size() - 1;
+        if (pendingExpandedStates != null) {
+            if (index < pendingExpandedStates.length) {
+                section.expanded = pendingExpandedStates[index];
+            }
+            if (index >= pendingExpandedStates.length - 1) {
+                pendingExpandedStates = null;
+            }
+        }
+        renderSection(index);
     }
 
     /**
@@ -515,5 +533,71 @@ public class ExpandableLayout extends LinearLayout {
         renderer.renderParent(sectionView.getChildAt(0), section.parent, false, index);
         if (collapseListener != null)
             collapseListener.onCollapsed(index, section.parent, sectionView.getChildAt(0));
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        SavedState state = new SavedState(super.onSaveInstanceState());
+        state.expandedStates = new boolean[sections.size()];
+        for (int i = 0; i < sections.size(); i++) {
+            state.expandedStates[i] = sections.get(i).expanded;
+        }
+        return state;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        if (!(state instanceof SavedState)) {
+            super.onRestoreInstanceState(state);
+            return;
+        }
+        SavedState savedState = (SavedState) state;
+        super.onRestoreInstanceState(savedState.getSuperState());
+
+        boolean[] expandedStates = savedState.expandedStates;
+        // Sections that already exist are updated in place without
+        // notifying the listeners, the rest is applied when added.
+        for (int i = 0; i < Math.min(expandedStates.length, sections.size()); i++) {
+            if (sections.get(i).expanded != expandedStates[i]) {
+                sections.get(i).expanded = expandedStates[i];
+                if (renderer != null) {
+                    removeViewAt(i);
+                    renderSection(i);
+                }
+            }
+        }
+        pendingExpandedStates = expandedStates.length > sections.size() ? expandedStates : null;
+    }
+
+    static class SavedState extends BaseSavedState {
+
+        boolean[] expandedStates;
+
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        SavedState(Parcel source) {
+            super(source);
+            expandedStates = source.createBooleanArray();
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeBooleanArray(expandedStates);
+        }
+
+        public static final Creator<SavedState> CREATOR = new Creator<SavedState>() {
+            @Override
+            public SavedState createFromParcel(Parcel source) {
+                return new SavedState(source);
+            }
+
+            @Override
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
     }
 }
