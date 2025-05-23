@@ -57,6 +57,8 @@ public class ExpandableLayout extends LinearLayout {
 
     private ExpandCollapseListener.CollapseListener collapseListener;
 
+    private OnChildClickListener childClickListener;
+
     private Operation currentFilter = DEFAULT_FILTER;
 
     private Operation currentParentFilter = DEFAULT_FILTER;
@@ -138,6 +140,22 @@ public class ExpandableLayout extends LinearLayout {
 
     public <P> void setExpandListener(ExpandCollapseListener.ExpandListener<P> expandListener) {
         this.expandListener = expandListener;
+    }
+
+    /**
+     * Called when a child row is clicked. Pass null to remove the listener.
+     */
+    public <P, C> void setOnChildClickListener(@Nullable OnChildClickListener<P, C> listener) {
+        boolean attach = childClickListener == null && listener != null;
+        childClickListener = listener;
+        if (attach) {
+            for (int i = 0; i < getChildCount(); i++) {
+                ViewGroup sectionView = (ViewGroup) getChildAt(i);
+                for (int j = 1; j < sectionView.getChildCount(); j++) {
+                    sectionView.getChildAt(j).setOnClickListener(childClickHandler);
+                }
+            }
+        }
     }
 
     public <P> void setCollapseListener(ExpandCollapseListener.CollapseListener<P> collapseListener) {
@@ -341,12 +359,39 @@ public class ExpandableLayout extends LinearLayout {
         }
     }
 
+    /**
+     * Inflates a child row. The click listener is set before the renderer
+     * runs, so a listener set in renderChild() still takes precedence.
+     */
+    private View inflateChild(ViewGroup sectionLayout) {
+        View childView = layoutInflater.inflate(childLayout, sectionLayout, false);
+        if (childClickListener != null) {
+            childView.setOnClickListener(childClickHandler);
+        }
+        return childView;
+    }
+
+    private final OnClickListener childClickHandler = new OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (childClickListener == null) {
+                return;
+            }
+            ViewGroup sectionView = (ViewGroup) view.getParent();
+            int parentIndex = indexOfChild(sectionView);
+            int childIndex = sectionView.indexOfChild(view) - 1;
+            Section section = sections.get(parentIndex);
+            childClickListener.onChildClicked(parentIndex, section.parent,
+                    childIndex, section.children.get(childIndex), view);
+        }
+    };
+
     private <C> void notifyItemAdded(int parentIndex, C child) {
         if (renderer == null) {
             return;
         }
         ViewGroup parentView = (ViewGroup) getChildAt(parentIndex);
-        View childView = layoutInflater.inflate(childLayout, parentView, false);
+        View childView = inflateChild(parentView);
         renderer.renderChild(childView, child, parentIndex, sections.get(parentIndex).children.size() - 1);
         childView.setVisibility(isChildVisible(sections.get(parentIndex), child) ? View.VISIBLE : View.GONE);
         parentView.addView(childView);
@@ -361,7 +406,7 @@ public class ExpandableLayout extends LinearLayout {
         // The children were already appended to the section.
         int firstPosition = sections.get(parentIndex).children.size() - children.size();
         for (int i = 0; i < children.size(); i++) {
-            View childView = layoutInflater.inflate(childLayout, parentView, false);
+            View childView = inflateChild(parentView);
             renderer.renderChild(childView, children.get(i), parentIndex, firstPosition + i);
             childView.setVisibility(isChildVisible(sections.get(parentIndex), children.get(i)) ? View.VISIBLE : View.GONE);
             parentView.addView(childView);
@@ -396,7 +441,7 @@ public class ExpandableLayout extends LinearLayout {
         // otherwise expanding the section later has nothing to show.
         for (int i = 0; i < section.children.size(); i++) {
             Object child = section.children.get(i);
-            View childView = layoutInflater.inflate(childLayout, sectionLayout, false);
+            View childView = inflateChild(sectionLayout);
             renderer.renderChild(childView, child, sectionIndex, i);
             childView.setVisibility(isChildVisible(section, child) ? View.VISIBLE : View.GONE);
             sectionLayout.addView(childView);

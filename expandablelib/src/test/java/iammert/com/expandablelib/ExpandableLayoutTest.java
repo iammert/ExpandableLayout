@@ -557,4 +557,19 @@ public class ExpandableLayoutTest {
         assertEquals(true, layout.isExpanded(1));
         assertEquals(true, layout.isExpanded(2));
     }
+
+    @Test
+    public void childClickListener_receivesPositionsAndModels() {
+        List<String> clicks = new ArrayList<>();
+        layout.addSection(section("Fruits", true, "Apple"));
+        layout.setOnChildClickListener((OnChildClickListener<String, String>)
+                (parentIndex, parent, childIndex, child, view) ->
+                        clicks.add(parent + "/" + child + "@" + parentIndex + ":" + childIndex));
+        layout.addSection(section("Vegetables", true, "Carrot", "Leek"));
+
+        sectionView(0).getChildAt(1).performClick();
+        sectionView(1).getChildAt(2).performClick();
+
+        assertEquals(Arrays.asList("Fruits/Apple@0:0", "Vegetables/Leek@1:1"), clicks);
+    }
 }
