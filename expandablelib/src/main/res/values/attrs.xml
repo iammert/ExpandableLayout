@@ -6,6 +6,8 @@
         <attr name="childLayout" format="reference" />
         <!-- Collapse the other sections when one is expanded. -->
         <attr name="singleExpansion" format="boolean" />
+        <!-- Animate rows appearing and disappearing on expand/collapse. -->
+        <attr name="animateExpansion" format="boolean" />
     </declare-styleable>
 
 </resources>

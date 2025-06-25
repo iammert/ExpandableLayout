@@ -1,5 +1,6 @@
 package iammert.com.expandablelib;
 
+import android.animation.LayoutTransition;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -65,6 +66,8 @@ public class ExpandableLayout extends LinearLayout {
 
     private boolean singleExpansion;
 
+    private boolean animateExpansion;
+
     /**
      * Restored expanded states for sections that were not added yet
      * when the instance state was restored.
@@ -102,12 +105,14 @@ public class ExpandableLayout extends LinearLayout {
             parentLayout = typedArray.getResourceId(R.styleable.ExpandableLayout_parentLayout, NO_RES);
             childLayout = typedArray.getResourceId(R.styleable.ExpandableLayout_childLayout, NO_RES);
             singleExpansion = typedArray.getBoolean(R.styleable.ExpandableLayout_singleExpansion, false);
+            animateExpansion = typedArray.getBoolean(R.styleable.ExpandableLayout_animateExpansion, false);
             layoutInflater = LayoutInflater.from(context);
         } finally {
             if (typedArray != null) {
                 typedArray.recycle();
             }
         }
+        applyLayoutTransition(this);
     }
 
     /**
@@ -136,6 +141,33 @@ public class ExpandableLayout extends LinearLayout {
 
     public boolean isSingleExpansion() {
         return singleExpansion;
+    }
+
+    /**
+     * Animates child rows in and out and moves the following sections
+     * smoothly when a section expands or collapses. Disabled by default,
+     * same as {@code app:animateExpansion}.
+     */
+    public void setAnimateExpansion(boolean animateExpansion) {
+        this.animateExpansion = animateExpansion;
+        applyLayoutTransition(this);
+        for (int i = 0; i < getChildCount(); i++) {
+            applyLayoutTransition((ViewGroup) getChildAt(i));
+        }
+    }
+
+    public boolean isAnimateExpansion() {
+        return animateExpansion;
+    }
+
+    private void applyLayoutTransition(ViewGroup viewGroup) {
+        if (!animateExpansion) {
+            viewGroup.setLayoutTransition(null);
+            return;
+        }
+        LayoutTransition transition = new LayoutTransition();
+        transition.enableTransitionType(LayoutTransition.CHANGING);
+        viewGroup.setLayoutTransition(transition);
     }
 
     public <P> void setExpandListener(ExpandCollapseListener.ExpandListener<P> expandListener) {
@@ -424,6 +456,7 @@ public class ExpandableLayout extends LinearLayout {
         LinearLayout sectionLayout = new LinearLayout(getContext());
         sectionLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         sectionLayout.setOrientation(LinearLayout.VERTICAL);
+        applyLayoutTransition(sectionLayout);
 
         View parentView = layoutInflater.inflate(parentLayout, sectionLayout, false);
         parentView.setOnClickListener(new OnClickListener() {

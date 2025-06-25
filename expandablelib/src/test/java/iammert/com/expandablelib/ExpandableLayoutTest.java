@@ -1,6 +1,8 @@
 package iammert.com.expandablelib;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
@@ -571,5 +573,28 @@ public class ExpandableLayoutTest {
         sectionView(1).getChildAt(2).performClick();
 
         assertEquals(Arrays.asList("Fruits/Apple@0:0", "Vegetables/Leek@1:1"), clicks);
+    }
+
+    @Test
+    public void animateExpansion_isDisabledByDefault() {
+        layout.addSection(section("Fruits", true, "Apple"));
+
+        assertNull(layout.getLayoutTransition());
+        assertNull(sectionView(0).getLayoutTransition());
+    }
+
+    @Test
+    public void animateExpansion_appliesToExistingAndNewSections() {
+        layout.addSection(section("Fruits", true, "Apple"));
+
+        layout.setAnimateExpansion(true);
+        layout.addSection(section("Vegetables", true, "Carrot"));
+
+        assertNotNull(layout.getLayoutTransition());
+        assertNotNull(sectionView(0).getLayoutTransition());
+        assertNotNull(sectionView(1).getLayoutTransition());
+
+        layout.setAnimateExpansion(false);
+        assertNull(sectionView(1).getLayoutTransition());
     }
 }
