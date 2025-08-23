@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">expandablelib</string>
+    <string name="expandable_layout_state_expanded">Expanded</string>
+    <string name="expandable_layout_state_collapsed">Collapsed</string>
 </resources>

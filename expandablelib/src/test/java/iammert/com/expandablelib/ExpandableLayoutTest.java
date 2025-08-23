@@ -12,6 +12,7 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.TextView;
 
 import org.junit.Before;
@@ -596,5 +597,23 @@ public class ExpandableLayoutTest {
 
         layout.setAnimateExpansion(false);
         assertNull(sectionView(1).getLayoutTransition());
+    }
+
+    @Test
+    public void parentRow_exposesStateAndActionsToAccessibility() {
+        layout.addSection(section("Fruits", true, "Apple"));
+
+        AccessibilityNodeInfo info = AccessibilityNodeInfo.obtain();
+        parentView(0).onInitializeAccessibilityNodeInfo(info);
+        assertEquals("Expanded", info.getStateDescription().toString());
+        assertTrue(info.getActionList().contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE));
+
+        assertTrue(parentView(0).performAccessibilityAction(AccessibilityNodeInfo.ACTION_COLLAPSE, null));
+        assertEquals(false, layout.isExpanded(0));
+
+        info = AccessibilityNodeInfo.obtain();
+        parentView(0).onInitializeAccessibilityNodeInfo(info);
+        assertEquals("Collapsed", info.getStateDescription().toString());
+        assertTrue(info.getActionList().contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND));
     }
 }

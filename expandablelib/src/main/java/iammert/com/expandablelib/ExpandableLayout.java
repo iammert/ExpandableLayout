@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.LayoutRes;
@@ -14,6 +15,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.LinearLayout;
 
 import java.util.ArrayList;
@@ -418,6 +420,44 @@ public class ExpandableLayout extends LinearLayout {
         }
     };
 
+    /**
+     * Exposes the expanded state of parent rows to accessibility services
+     * and offers expand/collapse actions instead of a plain click.
+     */
+    private final AccessibilityDelegate parentAccessibilityDelegate = new AccessibilityDelegate() {
+        @Override
+        public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+            super.onInitializeAccessibilityNodeInfo(host, info);
+            int index = indexOfChild((View) host.getParent());
+            if (index < 0) {
+                return;
+            }
+            boolean expanded = sections.get(index).expanded;
+            info.addAction(expanded
+                    ? AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE
+                    : AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                info.setStateDescription(getContext().getString(expanded
+                        ? R.string.expandable_layout_state_expanded
+                        : R.string.expandable_layout_state_collapsed));
+            }
+        }
+
+        @Override
+        public boolean performAccessibilityAction(View host, int action, Bundle args) {
+            int index = indexOfChild((View) host.getParent());
+            if (index >= 0 && action == AccessibilityNodeInfo.ACTION_EXPAND) {
+                expand(index);
+                return true;
+            }
+            if (index >= 0 && action == AccessibilityNodeInfo.ACTION_COLLAPSE) {
+                collapse(index);
+                return true;
+            }
+            return super.performAccessibilityAction(host, action, args);
+        }
+    };
+
     private <C> void notifyItemAdded(int parentIndex, C child) {
         if (renderer == null) {
             return;
@@ -467,6 +507,7 @@ public class ExpandableLayout extends LinearLayout {
                 toggle(indexOfChild((View) view.getParent()));
             }
         });
+        parentView.setAccessibilityDelegate(parentAccessibilityDelegate);
         renderer.renderParent(parentView, section.parent, section.expanded, sectionIndex);
         sectionLayout.addView(parentView);
 
