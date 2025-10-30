@@ -616,4 +616,17 @@ public class ExpandableLayoutTest {
         assertEquals("Collapsed", info.getStateDescription().toString());
         assertTrue(info.getActionList().contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND));
     }
+
+    @Test
+    public void sectionsWithNullParent_doNotBreakLookups() {
+        layout.addSection(section(null, true, "Misc"));
+        layout.addSection(section("Fruits", false, "Apple"));
+
+        layout.addChild("Fruits", "Orange");
+        layout.expand("Fruits");
+        layout.addChild(null, "Other");
+
+        assertEquals(Arrays.asList("Apple@1:0", "Orange@1:1"), visibleChildren(1));
+        assertEquals(Arrays.asList("Misc", "Other"), layout.getSections().get(0).children);
+    }
 }

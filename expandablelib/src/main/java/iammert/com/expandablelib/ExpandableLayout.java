@@ -20,6 +20,7 @@ import android.widget.LinearLayout;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by mertsimsek on 28/07/2017.
@@ -314,7 +315,7 @@ public class ExpandableLayout extends LinearLayout {
 
     private int indexOfParent(Object parent) {
         for (int i = 0; i < sections.size(); i++) {
-            if (sections.get(i).parent.equals(parent)) {
+            if (Objects.equals(sections.get(i).parent, parent)) {
                 return i;
             }
         }
