@@ -23,14 +23,29 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * A vertical layout of sections, each with a parent row that expands and
+ * collapses its child rows. Rows are inflated from {@code app:parentLayout}
+ * and {@code app:childLayout} and bound by a {@link Renderer}.
+ *
  * Created by mertsimsek on 28/07/2017.
  */
 
 public class ExpandableLayout extends LinearLayout {
 
+    /**
+     * Binds models to the inflated parent and child rows.
+     */
     public interface Renderer<P, C> {
+        /**
+         * Called when a parent row is created, when its section is expanded
+         * or collapsed and from {@link #notifyParentChanged(int)}.
+         */
         void renderParent(View view, P model, boolean isExpanded, int parentPosition);
 
+        /**
+         * Called when a child row is created and from
+         * {@link #notifyChildChanged(int, int)}.
+         */
         void renderChild(View view, C model, int parentPosition, int childPosition);
     }
 
