@@ -1,38 +1,47 @@
 package iammert.com.expandablelayout;
 
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import iammert.com.expandablelib.ExpandCollapseListener;
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import com.google.android.material.appbar.MaterialToolbar;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+
 import iammert.com.expandablelib.ExpandableLayout;
+import iammert.com.expandablelib.OnChildClickListener;
 import iammert.com.expandablelib.Section;
 
 public class MainActivity extends AppCompatActivity {
 
-    String[] parents = new String[]{"Fruits",
-            "Nice Fruits", "Cool Fruits",
-            "Perfect Fruits", "Frozen Fruits",
-            "Warm Fruits"};
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        applyWindowInsets();
 
-
-        EditText editText = (EditText) findViewById(R.id.edittext);
-        ExpandableLayout sectionLinearLayout = (ExpandableLayout) findViewById(R.id.el);
-
-        sectionLinearLayout.setRenderer(new ExpandableLayout.Renderer<FruitCategory, Fruit>() {
+        ExpandableLayout expandableLayout = findViewById(R.id.el);
+        expandableLayout.setRenderer(new ExpandableLayout.Renderer<FruitCategory, Fruit>() {
             @Override
             public void renderParent(View view, FruitCategory model, boolean isExpanded, int parentPosition) {
                 ((TextView) view.findViewById(R.id.tvParent)).setText(model.name);
-                view.findViewById(R.id.arrow).setBackgroundResource(isExpanded ? R.drawable.arrow_up : R.drawable.arrow_down);
+                ((ImageView) view.findViewById(R.id.arrow))
+                        .setImageResource(isExpanded ? R.drawable.arrow_up : R.drawable.arrow_down);
             }
 
             @Override
@@ -40,64 +49,77 @@ public class MainActivity extends AppCompatActivity {
                 ((TextView) view.findViewById(R.id.tvChild)).setText(model.name);
             }
         });
+        expandableLayout.setOnChildClickListener((OnChildClickListener<FruitCategory, Fruit>)
+                (parentIndex, parent, childIndex, child, view) -> Toast.makeText(this,
+                        getString(R.string.child_clicked, child.name, parent.name), Toast.LENGTH_SHORT).show());
 
-        sectionLinearLayout.addSection(getSection());
-        sectionLinearLayout.addSection(getSection());
-        sectionLinearLayout.addSection(getSection());
-        sectionLinearLayout.addSection(getSection());
-        sectionLinearLayout.addSection(getSection());
-        sectionLinearLayout.addSection(getSection());
-        sectionLinearLayout.addSection(getSection());
-        sectionLinearLayout.addSection(getSection());
-        sectionLinearLayout.addSection(getSection());
-        sectionLinearLayout.addSection(getSection());
-        sectionLinearLayout.addSection(getSection());
+        for (Section<FruitCategory, Fruit> section : createSections()) {
+            expandableLayout.addSection(section);
+        }
 
-        sectionLinearLayout.setExpandListener((ExpandCollapseListener.ExpandListener<FruitCategory>) (parentIndex, parent, view) -> {
-
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_expand_all) {
+                expandableLayout.expandAll();
+                return true;
+            } else if (item.getItemId() == R.id.action_collapse_all) {
+                expandableLayout.collapseAll();
+                return true;
+            }
+            return false;
         });
 
-        sectionLinearLayout.setCollapseListener((ExpandCollapseListener.CollapseListener<FruitCategory>) (parentIndex, parent, view) -> {
-
-        });
-
-
+        EditText editText = findViewById(R.id.edittext);
         editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                sectionLinearLayout.filterChildren(obj -> ((Fruit) obj).name.toLowerCase().contains(s.toString().toLowerCase()));
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-
+                String query = s.toString().trim().toLowerCase(Locale.ROOT);
+                if (query.isEmpty()) {
+                    expandableLayout.clearFilter();
+                } else {
+                    expandableLayout.filterChildren(obj ->
+                            ((Fruit) obj).name.toLowerCase(Locale.ROOT).contains(query));
+                }
             }
         });
     }
 
-    public Section<FruitCategory, Fruit> getSection() {
-        Section<FruitCategory, Fruit> section = new Section<>();
-        FruitCategory fruitCategory = new FruitCategory(parents[(int) (Math.random() * parents.length)]);
-        Fruit fruit1 = new Fruit("Apple");
-        Fruit fruit2 = new Fruit("Orange");
-        Fruit fruit3 = new Fruit("Banana");
-        Fruit fruit4 = new Fruit("Grape");
-        Fruit fruit5 = new Fruit("Strawberry");
-        Fruit fruit6 = new Fruit("Cherry");
+    private void applyWindowInsets() {
+        View root = findViewById(R.id.root);
+        View scroll = findViewById(R.id.scroll);
+        ViewCompat.setOnApplyWindowInsetsListener(root, (view, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+            view.setPadding(insets.left, insets.top, insets.right, 0);
+            scroll.setPadding(0, 0, 0, insets.bottom);
+            return WindowInsetsCompat.CONSUMED;
+        });
+    }
 
-        section.parent = fruitCategory;
-        section.children.add(fruit1);
-        section.children.add(fruit2);
-        section.children.add(fruit3);
-        section.children.add(fruit4);
-        section.children.add(fruit5);
-        section.children.add(fruit6);
-        section.expanded = true;
-        return section;
+    private static List<Section<FruitCategory, Fruit>> createSections() {
+        List<Section<FruitCategory, Fruit>> sections = new ArrayList<>();
+        sections.add(section("Citrus", true, "Orange", "Lemon", "Lime", "Grapefruit", "Mandarin"));
+        sections.add(section("Berries", false, "Strawberry", "Blueberry", "Raspberry", "Blackberry"));
+        sections.add(section("Stone fruits", false, "Cherry", "Peach", "Plum", "Apricot"));
+        sections.add(section("Tropical", false, "Banana", "Mango", "Pineapple", "Papaya", "Coconut"));
+        sections.add(section("Pomes", false, "Apple", "Pear", "Quince"));
+        sections.add(section("Melons", false, "Watermelon", "Cantaloupe", "Honeydew"));
+        return sections;
+    }
+
+    private static Section<FruitCategory, Fruit> section(String category, boolean expanded, String... fruits) {
+        List<Fruit> children = new ArrayList<>();
+        for (String fruit : Arrays.asList(fruits)) {
+            children.add(new Fruit(fruit));
+        }
+        return new Section<>(new FruitCategory(category), children, expanded);
     }
 }
