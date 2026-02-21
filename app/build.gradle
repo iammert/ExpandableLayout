@@ -3,27 +3,27 @@ plugins {
 }
 
 android {
-    namespace 'iammert.com.expandablelayout'
-    compileSdk 36
+    namespace = 'iammert.com.expandablelayout'
+    compileSdk = 36
 
     defaultConfig {
-        applicationId 'iammert.com.expandablelayout'
-        minSdk 21
-        targetSdk 36
-        versionCode 1
-        versionName '1.0'
+        applicationId = 'iammert.com.expandablelayout'
+        minSdk = 21
+        targetSdk = 36
+        versionCode = 1
+        versionName = '1.0'
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled = false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 }
 
