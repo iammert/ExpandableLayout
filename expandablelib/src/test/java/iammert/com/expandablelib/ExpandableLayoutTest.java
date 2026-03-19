@@ -629,4 +629,19 @@ public class ExpandableLayoutTest {
         assertEquals(Arrays.asList("Apple@1:0", "Orange@1:1"), visibleChildren(1));
         assertEquals(Arrays.asList("Misc", "Other"), layout.getSections().get(0).children);
     }
+
+    @Test
+    public void notifyDataSetChanged_rendersDirectChangesKeepingState() {
+        Section<String, String> section = section("Fruits", false, "Apple");
+        layout.addSection(section);
+        layout.expand(0);
+        layout.filterChildren(obj -> !obj.equals("Orange"));
+
+        section.children.add("Orange");
+        section.children.add("Banana");
+        layout.notifyDataSetChanged();
+
+        assertEquals(Arrays.asList("Apple@0:0", "Banana@0:2"), visibleChildren(0));
+        assertEquals("Fruits -", ((TextView) parentView(0)).getText().toString());
+    }
 }

@@ -541,6 +541,14 @@ public class ExpandableLayout extends LinearLayout {
     }
 
     /**
+     * Renders every section again, e.g. after models or the children lists
+     * of sections were changed directly. Expanded states and filters are kept.
+     */
+    public void notifyDataSetChanged() {
+        rerender();
+    }
+
+    /**
      * Renders the parent row of the section at the given position again,
      * e.g. after its model changed. Invalid positions are ignored.
      */
