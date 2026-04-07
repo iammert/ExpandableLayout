@@ -644,4 +644,14 @@ public class ExpandableLayoutTest {
         assertEquals(Arrays.asList("Apple@0:0", "Banana@0:2"), visibleChildren(0));
         assertEquals("Fruits -", ((TextView) parentView(0)).getText().toString());
     }
+
+    @Test
+    public void addSections_addsAllInOrder() {
+        layout.addSections(Arrays.asList(
+                section("Fruits", true, "Apple"),
+                section("Vegetables", false, "Carrot")));
+
+        assertEquals(2, layout.getSections().size());
+        assertEquals("Vegetables +", ((TextView) parentView(1)).getText().toString());
+    }
 }

@@ -246,6 +246,15 @@ public class ExpandableLayout extends LinearLayout {
     }
 
     /**
+     * Adds several sections at once, in order.
+     */
+    public void addSections(@NonNull List<? extends Section> sections) {
+        for (Section section : sections) {
+            addSection(section);
+        }
+    }
+
+    /**
      * Removes the section at the given position.
      */
     public void removeSection(int sectionIndex) {

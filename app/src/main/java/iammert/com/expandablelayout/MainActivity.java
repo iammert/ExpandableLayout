@@ -53,9 +53,7 @@ public class MainActivity extends AppCompatActivity {
                 (parentIndex, parent, childIndex, child, view) -> Toast.makeText(this,
                         getString(R.string.child_clicked, child.name, parent.name), Toast.LENGTH_SHORT).show());
 
-        for (Section<FruitCategory, Fruit> section : createSections()) {
-            expandableLayout.addSection(section);
-        }
+        expandableLayout.addSections(createSections());
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setOnMenuItemClickListener(item -> {
