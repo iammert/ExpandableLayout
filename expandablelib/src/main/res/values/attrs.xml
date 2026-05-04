@@ -8,6 +8,8 @@
         <attr name="singleExpansion" format="boolean" />
         <!-- Animate rows appearing and disappearing on expand/collapse. -->
         <attr name="animateExpansion" format="boolean" />
+        <!-- Whether tapping a parent row expands/collapses it. Defaults to true. -->
+        <attr name="toggleOnParentClick" format="boolean" />
     </declare-styleable>
 
 </resources>

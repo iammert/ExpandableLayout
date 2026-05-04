@@ -86,6 +86,8 @@ public class ExpandableLayout extends LinearLayout {
 
     private boolean animateExpansion;
 
+    private boolean toggleOnParentClick = true;
+
     /**
      * Restored expanded states for sections that were not added yet
      * when the instance state was restored.
@@ -124,6 +126,7 @@ public class ExpandableLayout extends LinearLayout {
             childLayout = typedArray.getResourceId(R.styleable.ExpandableLayout_childLayout, NO_RES);
             singleExpansion = typedArray.getBoolean(R.styleable.ExpandableLayout_singleExpansion, false);
             animateExpansion = typedArray.getBoolean(R.styleable.ExpandableLayout_animateExpansion, false);
+            toggleOnParentClick = typedArray.getBoolean(R.styleable.ExpandableLayout_toggleOnParentClick, true);
             layoutInflater = LayoutInflater.from(context);
         } finally {
             if (typedArray != null) {
@@ -176,6 +179,29 @@ public class ExpandableLayout extends LinearLayout {
 
     public boolean isAnimateExpansion() {
         return animateExpansion;
+    }
+
+    /**
+     * Whether tapping a parent row toggles its section. Disable it when the
+     * parent row has its own controls and the section should only be
+     * expanded from code, e.g. from an arrow button. Accessibility actions
+     * keep working. Same as {@code app:toggleOnParentClick}.
+     */
+    public void setToggleOnParentClick(boolean toggleOnParentClick) {
+        this.toggleOnParentClick = toggleOnParentClick;
+        for (int i = 0; i < getChildCount(); i++) {
+            View parentView = ((ViewGroup) getChildAt(i)).getChildAt(0);
+            if (toggleOnParentClick) {
+                parentView.setOnClickListener(parentClickHandler);
+            } else {
+                parentView.setOnClickListener(null);
+                parentView.setClickable(false);
+            }
+        }
+    }
+
+    public boolean isToggleOnParentClick() {
+        return toggleOnParentClick;
     }
 
     private void applyLayoutTransition(ViewGroup viewGroup) {
@@ -449,6 +475,15 @@ public class ExpandableLayout extends LinearLayout {
      * Exposes the expanded state of parent rows to accessibility services
      * and offers expand/collapse actions instead of a plain click.
      */
+    private final OnClickListener parentClickHandler = new OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            // Look the section up by position, parents are not required
+            // to be unique (or to implement equals()).
+            toggle(indexOfChild((View) view.getParent()));
+        }
+    };
+
     private final AccessibilityDelegate parentAccessibilityDelegate = new AccessibilityDelegate() {
         @Override
         public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
@@ -524,14 +559,9 @@ public class ExpandableLayout extends LinearLayout {
         applyLayoutTransition(sectionLayout);
 
         View parentView = layoutInflater.inflate(parentLayout, sectionLayout, false);
-        parentView.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Look the section up by position, parents are not required
-                // to be unique (or to implement equals()).
-                toggle(indexOfChild((View) view.getParent()));
-            }
-        });
+        if (toggleOnParentClick) {
+            parentView.setOnClickListener(parentClickHandler);
+        }
         parentView.setAccessibilityDelegate(parentAccessibilityDelegate);
         renderer.renderParent(parentView, section.parent, section.expanded, sectionIndex);
         sectionLayout.addView(parentView);

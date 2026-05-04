@@ -654,4 +654,21 @@ public class ExpandableLayoutTest {
         assertEquals(2, layout.getSections().size());
         assertEquals("Vegetables +", ((TextView) parentView(1)).getText().toString());
     }
+
+    @Test
+    public void toggleOnParentClickDisabled_parentClickDoesNothing() {
+        layout.addSection(section("Fruits", true, "Apple"));
+        layout.setToggleOnParentClick(false);
+        layout.addSection(section("Vegetables", true, "Carrot"));
+
+        parentView(0).performClick();
+        parentView(1).performClick();
+
+        assertTrue(layout.isExpanded(0));
+        assertTrue(layout.isExpanded(1));
+        assertEquals(Arrays.asList(), events);
+
+        assertTrue(parentView(0).performAccessibilityAction(AccessibilityNodeInfo.ACTION_COLLAPSE, null));
+        assertEquals(false, layout.isExpanded(0));
+    }
 }
