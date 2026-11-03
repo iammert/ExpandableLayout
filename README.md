@@ -120,6 +120,9 @@ expandableLayout.filterChildren(obj -> ((Fruit) obj).name.toLowerCase().contains
 expandableLayout.clearFilter();
 ```
 
+# Changelog
+See [CHANGELOG.md](CHANGELOG.md).
+
 License
 --------
 
