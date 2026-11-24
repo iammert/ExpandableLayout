@@ -6,7 +6,7 @@ activity = "1.10.1"
 material = "1.13.0"
 junit = "4.13.2"
 androidx-test = "1.7.0"
-robolectric = "4.16"
+robolectric = "4.18.1"
 
 [libraries]
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
